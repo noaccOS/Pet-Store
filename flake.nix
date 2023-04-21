@@ -1,5 +1,5 @@
 {
-  description = "A Nix-flake-based Elixir development environment";
+  description = "Phoenix project made to get in touch with Phoenix and REST APIs";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/release-22.11";
