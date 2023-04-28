@@ -8,7 +8,7 @@ defmodule PetStoreWeb.UserSessionController do
     %{"email" => email, "password" => password} = user_params
 
     if user = Accounts.get_user_by_email_and_password(email, password) do
-      token = UserAuth.log_in_user(user, user_params)
+      token = UserAuth.log_in_user(conn, user, user_params)
       render(conn, :login, token: token)
     else
       # In order to prevent user enumeration attacks, don't disclose whether the email is registered.
