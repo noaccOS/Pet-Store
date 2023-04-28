@@ -240,7 +240,8 @@ defmodule PetStore.Accounts do
   Deletes the signed token with the given context.
   """
   def delete_user_token(token) do
-    Repo.delete_all(UserToken.token_and_context_query(token, @apicontext))
+    {:ok, query} = UserToken.token_and_context_query(token, @apicontext)
+    Repo.delete_all(query)
     :ok
   end
 

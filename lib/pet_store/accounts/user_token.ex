@@ -163,7 +163,17 @@ defmodule PetStore.Accounts.UserToken do
   Returns the token struct for the given token value and context.
   """
   def token_and_context_query(token, context) do
-    from UserToken, where: [token: ^token, context: ^context]
+    case Base.url_decode64(token, padding: false) do
+      {:ok, decoded_token} ->
+        hashed_token = :crypto.hash(@hash_algorithm, decoded_token)
+
+        query = from UserToken, where: [token: ^hashed_token, context: ^context]
+
+        {:ok, query}
+
+      :error ->
+        :error
+    end
   end
 
   @doc """

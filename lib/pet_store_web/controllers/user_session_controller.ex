@@ -17,8 +17,11 @@ defmodule PetStoreWeb.UserSessionController do
   end
 
   def delete(conn, _params) do
-    "Bearer " <> token = get_req_header(conn, "authentication")
-    UserAuth.log_out_user(token)
-    render(conn, :message_ok, msg: "User logged out successfully.")
+    with ["Bearer " <> token] <- conn |> get_req_header("authorization") do
+      UserAuth.log_out_user(token)
+      render(conn, :message_ok, msg: "User logged out successfully.")
+    else
+      _ -> conn |> resp(400, "Bad request") |> send_resp() |> halt()
+    end
   end
 end
