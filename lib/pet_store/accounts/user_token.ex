@@ -126,6 +126,7 @@ defmodule PetStore.Accounts.UserToken do
     end
   end
 
+  defp days_for_context("api"), do: @session_validity_in_days
   defp days_for_context("confirm"), do: @confirm_validity_in_days
   defp days_for_context("reset_password"), do: @reset_password_validity_in_days
 
