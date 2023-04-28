@@ -1,12 +1,30 @@
 defmodule PetStoreWeb.Router do
   use PetStoreWeb, :router
 
+  import PetStoreWeb.UserAuth
+
   pipeline :api do
     plug :accepts, ["json"]
   end
 
-  scope "/api", PetStoreWeb do
-    pipe_through :api
+  scope "/", PetStoreWeb do
+    pipe_through [:api, :require_authenticated_user]
+
+    put "/users/settings", UserSettingsController, :update
+    get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
+  end
+
+  scope "/", PetStoreWeb do
+    pipe_through [:api]
+
+    delete "/users/log_out", UserSessionController, :delete
+    post "/users/confirm", UserConfirmationController, :create
+    post "/users/confirm/:token", UserConfirmationController, :update
+
+    post "/users/register", UserRegistrationController, :create
+    post "/users/log_in", UserSessionController, :create
+    post "/users/reset_password", UserResetPasswordController, :create
+    put "/users/reset_password/:token", UserResetPasswordController, :update
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
