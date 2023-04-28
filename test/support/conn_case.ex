@@ -35,7 +35,7 @@ defmodule PetStoreWeb.ConnCase do
     PetStore.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
-  
+
   @doc """
   Setup helper that registers and logs in users.
 
@@ -55,7 +55,7 @@ defmodule PetStoreWeb.ConnCase do
   It returns an updated `conn`.
   """
   def log_in_user(conn, user) do
-    token = PetStore.Accounts.generate_user_session_token(user)
+    token = PetStore.Accounts.generate_user_token(user)
 
     conn
     |> Phoenix.ConnTest.init_test_session(%{})

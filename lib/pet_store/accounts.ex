@@ -217,12 +217,12 @@ defmodule PetStore.Accounts do
     end
   end
 
-  ## Session
+  ## Tokens
 
   @doc """
-  Generates a session token.
+  Generates a token.
   """
-  def generate_user_session_token(user) do
+  def generate_user_token(user) do
     {token, user_token} = UserToken.build_email_token(user, @apicontext)
     Repo.insert!(user_token)
     token
@@ -231,7 +231,7 @@ defmodule PetStore.Accounts do
   @doc """
   Gets the user with the given signed token.
   """
-  def get_user_by_session_token(token) do
+  def get_user_by_token(token) do
     {:ok, query} = UserToken.verify_email_token_query(token, @apicontext)
     Repo.one(query)
   end
@@ -239,7 +239,7 @@ defmodule PetStore.Accounts do
   @doc """
   Deletes the signed token with the given context.
   """
-  def delete_user_session_token(token) do
+  def delete_user_token(token) do
     Repo.delete_all(UserToken.token_and_context_query(token, @apicontext))
     :ok
   end

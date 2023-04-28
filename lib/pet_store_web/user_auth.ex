@@ -16,27 +16,17 @@ defmodule PetStoreWeb.UserAuth do
 
   @doc """
   Logs the user in.
-
-  It renews the session ID and clears the whole session
-  to avoid fixation attacks. See the renew_session
-  function to customize this behaviour.
-
-  It also sets a `:live_socket_id` key in the session,
-  so LiveView sessions are identified and automatically
-  disconnected on log out. The line can be safely removed
-  if you are not using LiveView.
+  In practice, it returns a token for the requested user.
   """
   def log_in_user(conn, user, params \\ %{}) do
-    Accounts.generate_user_session_token(user)
+    Accounts.generate_user_token(user)
   end
 
   @doc """
-  Logs the user out.
-
-  It clears all session data for safety. See renew_session.
+  Logs the user out, deleting its token.
   """
   def log_out_user(token) do
-    token && Accounts.delete_user_session_token(token)
+    token && Accounts.delete_user_token(token)
   end
 
   @doc """
