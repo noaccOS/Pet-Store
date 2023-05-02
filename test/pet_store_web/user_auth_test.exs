@@ -1,12 +1,9 @@
 defmodule PetStoreWeb.UserAuthTest do
   use PetStoreWeb.ConnCase, async: true
 
-  alias Phoenix.LiveView
   alias PetStore.Accounts
   alias PetStoreWeb.UserAuth
   import PetStore.AccountsFixtures
-
-  @remember_me_cookie "_testphx_web_user_remember_me"
 
   setup %{conn: conn} do
     conn =
