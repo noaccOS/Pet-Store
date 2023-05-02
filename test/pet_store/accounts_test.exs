@@ -317,15 +317,16 @@ defmodule PetStore.AccountsTest do
 
     test "generates a token", %{user: user} do
       token = Accounts.generate_user_token(user)
-      assert user_token = Repo.get_by(UserToken, token: token)
-      assert user_token.context == "session"
+      {:ok, hashed_token} = UserToken.generate_private_token(token)
+      assert user_token = Repo.get_by(UserToken, token: hashed_token)
+      assert user_token.context == "api"
 
       # Creating the same token for another user should fail
       assert_raise Ecto.ConstraintError, fn ->
         Repo.insert!(%UserToken{
           token: user_token.token,
           user_id: user_fixture().id,
-          context: "session"
+          context: "api"
         })
       end
     end

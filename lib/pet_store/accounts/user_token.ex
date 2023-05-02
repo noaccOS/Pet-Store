@@ -22,7 +22,8 @@ defmodule PetStore.Accounts.UserToken do
     timestamps(updated_at: false)
   end
 
-  defp generate_private_token(token) do
+  @doc false
+  def generate_private_token(token) do
     with {:ok, decoded_token} <- Base.url_decode64(token, padding: false) do
       hashed_token = :crypto.hash(@hash_algorithm, decoded_token)
       {:ok, hashed_token}
