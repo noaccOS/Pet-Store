@@ -28,11 +28,11 @@ defmodule PetStoreWeb.UserAuthTest do
   end
 
   describe "logout_user/1" do
-    test "works even if user is already logged out", %{conn: conn} do
-      conn = conn |> fetch_cookies() |> UserAuth.log_out_user()
-      refute get_session(conn, :user_token)
-      assert %{max_age: 0} = conn.resp_cookies[@remember_me_cookie]
-      assert redirected_to(conn) == ~p"/"
+    test "works even if user is already logged out", %{user: user} do
+      token = Accounts.generate_user_token(user)
+      UserAuth.log_out_user(token)
+      refute Accounts.get_user_by_token(token)
+      assert UserAuth.log_out_user(token)
     end
   end
 
