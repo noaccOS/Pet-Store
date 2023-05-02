@@ -36,7 +36,7 @@ defmodule PetStoreWeb.UserAuth do
   they use the application at all, here would be a good place.
   """
   def require_authenticated_user(conn, _opts) do
-    with ["Bearer " <> token] <- conn |> get_req_header("authorization") do
+    with ["Bearer " <> token] <- get_req_header(conn, "authorization") do
       user = Accounts.get_user_by_token(token)
       assign(conn, :current_user, user)
     else
