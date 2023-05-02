@@ -29,7 +29,7 @@ defmodule PetStoreWeb.UserResetPasswordController do
       {:ok, _} ->
         render(conn, :message_ok, msg: "Password reset successfully.")
 
-      {:error, changeset} ->
+      {:error, _changeset} ->
         render(conn, :message_error, msg: "Error encountered during password reset.")
     end
   end

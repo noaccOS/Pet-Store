@@ -28,7 +28,7 @@ defmodule PetStoreWeb.UserSettingsController do
           msg: "A link to confirm your email change has been sent to the new address."
         )
 
-      {:error, changeset} ->
+      {:error, _changeset} ->
         render(conn, :message_error, msg: "There has been an error trying to change the email.")
     end
   end
@@ -43,7 +43,7 @@ defmodule PetStoreWeb.UserSettingsController do
         token = conn.assigns.user_token
         render(conn, :re_login, msg: "Password updated successfully.", token: token)
 
-      {:error, changeset} ->
+      {:error, _changeset} ->
         render(conn, :message_error, msg: "Error. Password not updated")
     end
   end

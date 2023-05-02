@@ -2,7 +2,6 @@ defmodule PetStoreWeb.UserRegistrationController do
   use PetStoreWeb, :controller
 
   alias PetStore.Accounts
-  alias PetStore.Accounts.User
   alias PetStoreWeb.UserAuth
 
   def create(conn, %{"user" => user_params}) do
