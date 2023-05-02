@@ -18,7 +18,7 @@ defmodule PetStore.AccountsFixtures do
     {:ok, user} =
       attrs
       |> valid_user_attributes()
-      |> Auth.Accounts.register_user()
+      |> PetStore.Accounts.register_user()
 
     user
   end
