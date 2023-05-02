@@ -62,13 +62,15 @@ defmodule PetStore.Accounts.UserToken do
   not expired (after @session_validity_in_days).
   """
   def verify_session_token_query(token) do
-    query =
-      from token in token_and_context_query(token, "session"),
-        join: user in assoc(token, :user),
-        where: token.inserted_at > ago(@session_validity_in_days, "day"),
-        select: user
+    with {:ok, tcq} <- token_and_context_query(token, "session") do
+      query =
+        from token in tcq,
+          join: user in assoc(token, :user),
+          where: token.inserted_at > ago(@session_validity_in_days, "day"),
+          select: user
 
-    {:ok, query}
+      {:ok, query}
+    end
   end
 
   @doc """
@@ -122,11 +124,11 @@ defmodule PetStore.Accounts.UserToken do
   see `verify_change_email_token_query/2`.
   """
   def verify_email_token_query(token, context) do
-    with {:ok, hashed_token} <- generate_private_token(token) do
+    with {:ok, tcq} <- token_and_context_query(token, context) do
       days = days_for_context(context)
 
       query =
-        from token in token_and_context_query(hashed_token, context),
+        from token in tcq,
           join: user in assoc(token, :user),
           where: token.inserted_at > ago(^days, "day") and token.sent_to == user.email,
           select: user
@@ -141,11 +143,11 @@ defmodule PetStore.Accounts.UserToken do
   The query returns the user found by the token, if any.
   """
   def verify_api_token_query(token, context) do
-    with {:ok, hashed_token} <- generate_private_token(token) do
+    with {:ok, tcq} <- token_and_context_query(token, context) do
       days = days_for_context(context)
 
       query =
-        from token in token_and_context_query(hashed_token, context),
+        from token in tcq,
           join: user in assoc(token, :user),
           where: token.inserted_at > ago(^days, "day"),
           select: user
@@ -173,9 +175,9 @@ defmodule PetStore.Accounts.UserToken do
   The context must always start with "change:".
   """
   def verify_change_email_token_query(token, "change:" <> _ = context) do
-    with {:ok, hashed_token} <- generate_private_token(token) do
+    with {:ok, tcq} <- token_and_context_query(token, context) do
       query =
-        from token in token_and_context_query(hashed_token, context),
+        from token in tcq,
           where: token.inserted_at > ago(@change_email_validity_in_days, "day")
 
       {:ok, query}
