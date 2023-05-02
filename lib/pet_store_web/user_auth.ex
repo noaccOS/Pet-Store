@@ -38,7 +38,10 @@ defmodule PetStoreWeb.UserAuth do
   def require_authenticated_user(conn, _opts) do
     with ["Bearer " <> token] <- get_req_header(conn, "authorization") do
       user = Accounts.get_user_by_token(token)
-      assign(conn, :current_user, user)
+
+      conn
+      |> assign(:current_user, user)
+      |> assign(:connection_token, token)
     else
       [] -> conn |> resp(401, "Unauthorized") |> send_resp() |> halt()
       _ -> conn |> resp(400, "Bad request") |> send_resp() |> halt()
