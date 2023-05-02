@@ -88,6 +88,13 @@ defmodule PetStore.Accounts.UserToken do
     build_hashed_token(user, context, user.email)
   end
 
+  @doc """
+  Builds a token to be used
+  """
+  def build_api_token(user, context) do
+    build_hashed_token(user, context, nil)
+  end
+
   defp build_hashed_token(user, context, sent_to) do
     token = :crypto.strong_rand_bytes(@rand_size)
     hashed_token = :crypto.hash(@hash_algorithm, token)
@@ -122,6 +129,25 @@ defmodule PetStore.Accounts.UserToken do
         from token in token_and_context_query(hashed_token, context),
           join: user in assoc(token, :user),
           where: token.inserted_at > ago(^days, "day") and token.sent_to == user.email,
+          select: user
+
+      {:ok, query}
+    end
+  end
+
+  @doc """
+  Checks if the token is valid and returns its underlying lookup query.
+
+  The query returns the user found by the token, if any.
+  """
+  def verify_api_token_query(token, context) do
+    with {:ok, hashed_token} <- generate_private_token(token) do
+      days = days_for_context(context)
+
+      query =
+        from token in token_and_context_query(hashed_token, context),
+          join: user in assoc(token, :user),
+          where: token.inserted_at > ago(^days, "day"),
           select: user
 
       {:ok, query}

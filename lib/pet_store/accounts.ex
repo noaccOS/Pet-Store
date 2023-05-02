@@ -223,7 +223,7 @@ defmodule PetStore.Accounts do
   Generates a token.
   """
   def generate_user_token(user) do
-    {token, user_token} = UserToken.build_email_token(user, @apicontext)
+    {token, user_token} = UserToken.build_api_token(user, @apicontext)
     Repo.insert!(user_token)
     token
   end
@@ -232,7 +232,7 @@ defmodule PetStore.Accounts do
   Gets the user with the given signed token.
   """
   def get_user_by_token(token) do
-    {:ok, query} = UserToken.verify_email_token_query(token, @apicontext)
+    {:ok, query} = UserToken.verify_api_token_query(token, @apicontext)
     Repo.one(query)
   end
 
