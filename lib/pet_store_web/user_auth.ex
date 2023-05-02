@@ -41,7 +41,7 @@ defmodule PetStoreWeb.UserAuth do
 
       conn
       |> assign(:current_user, user)
-      |> assign(:connection_token, token)
+      |> assign(:user_token, token)
     else
       [] -> conn |> resp(401, "Unauthorized") |> send_resp() |> halt()
       _ -> conn |> resp(400, "Bad request") |> send_resp() |> halt()

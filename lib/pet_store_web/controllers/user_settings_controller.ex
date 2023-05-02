@@ -9,7 +9,7 @@ defmodule PetStoreWeb.UserSettingsController do
   def update(conn, %{"action" => "update_email"} = params) do
     %{"current_password" => password, "user" => user_params} = params
     user = conn.assigns.current_user
-    token = conn.assigns.connection_token
+    token = conn.assigns.user_token
 
     case Accounts.apply_user_email(user, password, user_params) do
       {:ok, applied_user} ->
