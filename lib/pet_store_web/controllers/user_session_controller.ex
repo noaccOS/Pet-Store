@@ -20,6 +20,6 @@ defmodule PetStoreWeb.UserSessionController do
   def delete(conn, _params) do
     conn
     |> UserAuth.log_out_user()
-    |> render(conn, :message_ok, msg: "User logged out successfully.")
+    |> render(:message_ok, msg: "User logged out successfully.")
   end
 end
