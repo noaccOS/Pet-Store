@@ -22,6 +22,13 @@ defmodule PetStore.Accounts.UserToken do
     timestamps(updated_at: false)
   end
 
+  defp generate_private_token(token) do
+    with {:ok, decoded_token} <- Base.url_decode64(token, padding: false) do
+      hashed_token = :crypto.hash(@hash_algorithm, decoded_token)
+      {:ok, hashed_token}
+    end
+  end
+
   @doc """
   Generates a token that will be stored in a signed place,
   such as session or cookie. As they are signed, those
@@ -108,21 +115,16 @@ defmodule PetStore.Accounts.UserToken do
   see `verify_change_email_token_query/2`.
   """
   def verify_email_token_query(token, context) do
-    case Base.url_decode64(token, padding: false) do
-      {:ok, decoded_token} ->
-        hashed_token = :crypto.hash(@hash_algorithm, decoded_token)
-        days = days_for_context(context)
+    with {:ok, hashed_token} <- generate_private_token(token) do
+      days = days_for_context(context)
 
-        query =
-          from token in token_and_context_query(hashed_token, context),
-            join: user in assoc(token, :user),
-            where: token.inserted_at > ago(^days, "day") and token.sent_to == user.email,
-            select: user
+      query =
+        from token in token_and_context_query(hashed_token, context),
+          join: user in assoc(token, :user),
+          where: token.inserted_at > ago(^days, "day") and token.sent_to == user.email,
+          select: user
 
-        {:ok, query}
-
-      :error ->
-        :error
+      {:ok, query}
     end
   end
 
@@ -145,18 +147,12 @@ defmodule PetStore.Accounts.UserToken do
   The context must always start with "change:".
   """
   def verify_change_email_token_query(token, "change:" <> _ = context) do
-    case Base.url_decode64(token, padding: false) do
-      {:ok, decoded_token} ->
-        hashed_token = :crypto.hash(@hash_algorithm, decoded_token)
+    with {:ok, hashed_token} <- generate_private_token(token) do
+      query =
+        from token in token_and_context_query(hashed_token, context),
+          where: token.inserted_at > ago(@change_email_validity_in_days, "day")
 
-        query =
-          from token in token_and_context_query(hashed_token, context),
-            where: token.inserted_at > ago(@change_email_validity_in_days, "day")
-
-        {:ok, query}
-
-      :error ->
-        :error
+      {:ok, query}
     end
   end
 
@@ -164,16 +160,9 @@ defmodule PetStore.Accounts.UserToken do
   Returns the token struct for the given token value and context.
   """
   def token_and_context_query(token, context) do
-    case Base.url_decode64(token, padding: false) do
-      {:ok, decoded_token} ->
-        hashed_token = :crypto.hash(@hash_algorithm, decoded_token)
-
-        query = from UserToken, where: [token: ^hashed_token, context: ^context]
-
-        {:ok, query}
-
-      :error ->
-        :error
+    with {:ok, hashed_token} <- generate_private_token(token) do
+      query = from UserToken, where: [token: ^hashed_token, context: ^context]
+      {:ok, query}
     end
   end
 
