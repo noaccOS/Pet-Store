@@ -25,11 +25,10 @@ defmodule PetStoreWeb.UserAuthTest do
   end
 
   describe "logout_user/1" do
-    test "works even if user is already logged out", %{user: user} do
-      token = Accounts.generate_user_token(user)
-      UserAuth.log_out_user(token)
-      refute Accounts.get_user_by_token(token)
-      assert UserAuth.log_out_user(token)
+    test "works even if user is already logged out", %{conn: conn} do
+      conn = UserAuth.log_out_user(conn)
+      refute conn.assigns[:current_user]
+      assert UserAuth.log_out_user(conn)
     end
   end
 
@@ -41,13 +40,7 @@ defmodule PetStoreWeb.UserAuthTest do
     end
 
     test "does not halt if user is authenticated", %{conn: conn, user: user} do
-      token = Accounts.generate_user_token(user)
-
-      conn =
-        conn
-        |> put_req_header("authorization", "Bearer #{token}")
-        |> UserAuth.require_authenticated_user([])
-
+      conn = conn |> assign(:current_user, user) |> UserAuth.require_authenticated_user([])
       refute conn.halted
       refute conn.status
     end

@@ -39,9 +39,9 @@ defmodule PetStoreWeb.UserSettingsController do
 
     case Accounts.update_user_password(user, password, user_params) do
       {:ok, user} ->
-        conn
-        |> UserAuth.log_in_user(user)
-        |> render(:message_ok, msg: "Password updated successfully.")
+        conn = UserAuth.log_in_user(conn, user)
+        token = conn.assigns.user_token
+        render(conn, :re_login, msg: "Password updated successfully.", token: token)
 
       {:error, changeset} ->
         render(conn, :message_error, msg: "Error. Password not updated")

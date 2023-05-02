@@ -8,7 +8,8 @@ defmodule PetStoreWeb.UserSessionController do
     %{"email" => email, "password" => password} = user_params
 
     if user = Accounts.get_user_by_email_and_password(email, password) do
-      token = UserAuth.log_in_user(conn, user, user_params)
+      conn = UserAuth.log_in_user(conn, user, user_params)
+      token = conn.assigns.user_token
       render(conn, :login, token: token)
     else
       # In order to prevent user enumeration attacks, don't disclose whether the email is registered.
@@ -17,11 +18,8 @@ defmodule PetStoreWeb.UserSessionController do
   end
 
   def delete(conn, _params) do
-    with ["Bearer " <> token] <- get_req_header(conn, "authorization") do
-      UserAuth.log_out_user(token)
-      render(conn, :message_ok, msg: "User logged out successfully.")
-    else
-      _ -> conn |> resp(400, "Bad request") |> send_resp() |> halt()
-    end
+    conn
+    |> UserAuth.log_out_user()
+    |> render(conn, :message_ok, msg: "User logged out successfully.")
   end
 end

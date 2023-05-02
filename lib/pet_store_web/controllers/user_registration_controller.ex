@@ -14,7 +14,8 @@ defmodule PetStoreWeb.UserRegistrationController do
             &"POST #{url(~p[/users/confirm/#{&1}])}"
           )
 
-        token = UserAuth.log_in_user(conn, user)
+        conn = UserAuth.log_in_user(conn, user)
+        token = conn.assigns.user_token
         render(conn, :register, token: token)
 
       {:error, _} ->

@@ -5,6 +5,7 @@ defmodule PetStoreWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug :load_user_from_auth
   end
 
   scope "/", PetStoreWeb do
@@ -12,12 +13,13 @@ defmodule PetStoreWeb.Router do
 
     put "/users/settings", UserSettingsController, :update
     get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
+
+    delete "/users/log_out", UserSessionController, :delete
   end
 
   scope "/", PetStoreWeb do
     pipe_through [:api]
 
-    delete "/users/log_out", UserSessionController, :delete
     post "/users/confirm", UserConfirmationController, :create
     post "/users/confirm/:token", UserConfirmationController, :update
 
