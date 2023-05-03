@@ -40,7 +40,6 @@ defmodule PetStoreWeb.UserConfirmationControllerTest do
   end
 
   describe "POST /users/confirm/:token" do
-    @tag timeout: :infinity
     test "confirms the given token once", %{conn: conn, user: user} do
       token =
         extract_user_token(fn url ->
