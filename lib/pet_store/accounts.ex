@@ -60,14 +60,14 @@ defmodule PetStore.Accounts do
 
   ## Examples
 
-      iex> get_user!(123)
+      iex> fetch_user!(123)
       %User{}
 
-      iex> get_user!(456)
+      iex> fetch_user!(456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def fetch_user!(id), do: Repo.get!(User, id)
 
   ## User registration
 
