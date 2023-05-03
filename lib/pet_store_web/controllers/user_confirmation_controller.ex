@@ -4,7 +4,7 @@ defmodule PetStoreWeb.UserConfirmationController do
   alias PetStore.Accounts
 
   def create(conn, %{"user" => %{"email" => email}}) do
-    if user = Accounts.get_user_by_email(email) do
+    with {:ok, user} <- Accounts.fetch_user_by_email(email) do
       Accounts.deliver_user_confirmation_instructions(
         user,
         &"POST #{url(~p[/users/confirm/#{&1}])}"

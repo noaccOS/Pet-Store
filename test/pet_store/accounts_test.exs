@@ -6,14 +6,14 @@ defmodule PetStore.AccountsTest do
   import PetStore.AccountsFixtures
   alias PetStore.Accounts.{User, UserToken}
 
-  describe "get_user_by_email/1" do
+  describe "fetch_user_by_email/1" do
     test "does not return the user if the email does not exist" do
-      refute Accounts.get_user_by_email("unknown@example.com")
+      assert :error = Accounts.fetch_user_by_email("unknown@example.com")
     end
 
     test "returns the user if the email exists" do
       %{id: id} = user = user_fixture()
-      assert %User{id: ^id} = Accounts.get_user_by_email(user.email)
+      assert {:ok, %User{id: ^id}} = Accounts.fetch_user_by_email(user.email)
     end
   end
 

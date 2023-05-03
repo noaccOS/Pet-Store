@@ -6,7 +6,7 @@ defmodule PetStoreWeb.UserResetPasswordController do
   plug :get_user_by_reset_password_token when action == :update
 
   def create(conn, %{"user" => %{"email" => email}}) do
-    if user = Accounts.get_user_by_email(email) do
+    with {:ok, user} <- Accounts.fetch_user_by_email(email) do
       Accounts.deliver_user_reset_password_instructions(
         user,
         &"POST #{url(~p[/users/reset_password/#{&1}])}"

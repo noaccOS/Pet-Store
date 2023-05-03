@@ -17,15 +17,19 @@ defmodule PetStore.Accounts do
 
   ## Examples
 
-      iex> get_user_by_email("foo@example.com")
-      %User{}
+      iex> fetch_user_by_email("foo@example.com")
+      {:ok, %User{}}
 
-      iex> get_user_by_email("unknown@example.com")
-      nil
+      iex> fetch_user_by_email("unknown@example.com")
+      :error
 
   """
-  def get_user_by_email(email) when is_binary(email) do
-    Repo.get_by(User, email: email)
+  def fetch_user_by_email(email) when is_binary(email) do
+    with %User{} = user <- Repo.get_by(User, email: email) do
+      {:ok, user}
+    else
+      _ -> :error
+    end
   end
 
   @doc """
