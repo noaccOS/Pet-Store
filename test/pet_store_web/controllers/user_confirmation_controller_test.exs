@@ -13,10 +13,9 @@ defmodule PetStoreWeb.UserConfirmationControllerTest do
   describe "POST /users/confirm" do
     @tag :capture_log
     test "sends a new confirmation token", %{conn: conn, user: user} do
-      conn =
-        post(conn, ~p"/users/confirm", %{
-          "user" => %{"email" => user.email}
-        })
+      post(conn, ~p"/users/confirm", %{
+        "user" => %{"email" => user.email}
+      })
 
       assert Repo.get_by!(Accounts.UserToken, user_id: user.id).context == "confirm"
     end
@@ -24,19 +23,17 @@ defmodule PetStoreWeb.UserConfirmationControllerTest do
     test "does not send confirmation token if User is confirmed", %{conn: conn, user: user} do
       Repo.update!(Accounts.User.confirm_changeset(user))
 
-      conn =
-        post(conn, ~p"/users/confirm", %{
-          "user" => %{"email" => user.email}
-        })
+      post(conn, ~p"/users/confirm", %{
+        "user" => %{"email" => user.email}
+      })
 
       refute Repo.get_by(Accounts.UserToken, user_id: user.id)
     end
 
     test "does not send confirmation token if email is invalid", %{conn: conn} do
-      conn =
-        post(conn, ~p"/users/confirm", %{
-          "user" => %{"email" => "unknown@example.com"}
-        })
+      post(conn, ~p"/users/confirm", %{
+        "user" => %{"email" => "unknown@example.com"}
+      })
 
       assert Repo.all(Accounts.UserToken) == []
     end
