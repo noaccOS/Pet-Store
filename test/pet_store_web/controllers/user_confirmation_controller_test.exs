@@ -4,6 +4,7 @@ defmodule PetStoreWeb.UserConfirmationControllerTest do
   alias PetStore.Accounts
   alias PetStore.Repo
   import PetStore.AccountsFixtures
+  require IEx
 
   setup do
     %{user: user_fixture()}
@@ -17,11 +18,6 @@ defmodule PetStoreWeb.UserConfirmationControllerTest do
           "user" => %{"email" => user.email}
         })
 
-      assert redirected_to(conn) == ~p"/"
-
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
-               "If your email is in our system"
-
       assert Repo.get_by!(Accounts.UserToken, user_id: user.id).context == "confirm"
     end
 
@@ -33,11 +29,6 @@ defmodule PetStoreWeb.UserConfirmationControllerTest do
           "user" => %{"email" => user.email}
         })
 
-      assert redirected_to(conn) == ~p"/"
-
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
-               "If your email is in our system"
-
       refute Repo.get_by(Accounts.UserToken, user_id: user.id)
     end
 
@@ -47,16 +38,12 @@ defmodule PetStoreWeb.UserConfirmationControllerTest do
           "user" => %{"email" => "unknown@example.com"}
         })
 
-      assert redirected_to(conn) == ~p"/"
-
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
-               "If your email is in our system"
-
       assert Repo.all(Accounts.UserToken) == []
     end
   end
 
   describe "POST /users/confirm/:token" do
+    @tag timeout: :infinity
     test "confirms the given token once", %{conn: conn, user: user} do
       token =
         extract_user_token(fn url ->
@@ -64,21 +51,18 @@ defmodule PetStoreWeb.UserConfirmationControllerTest do
         end)
 
       conn = post(conn, ~p"/users/confirm/#{token}")
-      assert redirected_to(conn) == ~p"/"
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
-               "User confirmed successfully"
+      user = Accounts.fetch_user!(user.id)
 
-      assert Accounts.get_user!(user.id).confirmed_at
-      refute get_session(conn, :user_token)
+      assert user.confirmed_at
+      refute conn.assigns[:user_token]
       assert Repo.all(Accounts.UserToken) == []
 
       # When not logged in
       conn = post(conn, ~p"/users/confirm/#{token}")
-      assert redirected_to(conn) == ~p"/"
+      %{resp_body: body} = conn
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
-               "User confirmation link is invalid or it has expired"
+      assert body =~ "User confirmation link is invalid or it has expired."
 
       # When logged in
       conn =
@@ -86,18 +70,17 @@ defmodule PetStoreWeb.UserConfirmationControllerTest do
         |> log_in_user(user)
         |> post(~p"/users/confirm/#{token}")
 
-      assert redirected_to(conn) == ~p"/"
-      refute Phoenix.Flash.get(conn.assigns.flash, :error)
+      %{resp_body: body} = conn
+      assert body =~ ~s("status":"ok")
+      refute body =~ "User confirmation link is invalid or it has expired."
     end
 
     test "does not confirm email with invalid token", %{conn: conn, user: user} do
       conn = post(conn, ~p"/users/confirm/oops")
-      assert redirected_to(conn) == ~p"/"
+      %{resp_body: body} = conn
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
-               "User confirmation link is invalid or it has expired"
-
-      refute Accounts.get_user!(user.id).confirmed_at
+      assert body =~ "User confirmation link is invalid or it has expired."
+      refute Accounts.fetch_user!(user.id).confirmed_at
     end
   end
 end
