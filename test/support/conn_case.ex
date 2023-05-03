@@ -59,6 +59,7 @@ defmodule PetStoreWeb.ConnCase do
 
     conn
     |> Phoenix.ConnTest.init_test_session(%{})
-    |> Plug.Conn.put_session(:user_token, token)
+    |> Plug.Conn.assign(:user_token, token)
+    |> Plug.Conn.assign(:current_user, user)
   end
 end
