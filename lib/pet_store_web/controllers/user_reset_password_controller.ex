@@ -25,7 +25,7 @@ defmodule PetStoreWeb.UserResetPasswordController do
   # Do not log in the user after reset password to avoid a
   # leaked token giving the user access to the account.
   def update(conn, %{"user" => user_params}) do
-    case Accounts.reset_user_password(conn.assigns.user, user_params) do
+    case Accounts.reset_user_password(conn.assigns.current_user, user_params) do
       {:ok, _} ->
         render(conn, :message_ok, msg: "Password reset successfully.")
 
@@ -39,7 +39,7 @@ defmodule PetStoreWeb.UserResetPasswordController do
 
     case Accounts.fetch_user_by_reset_password_token(token) do
       {:ok, user} ->
-        conn |> assign(:user, user) |> assign(:token, token)
+        conn |> assign(:current_user, user) |> assign(:user_token, token)
 
       :error ->
         render(conn, :message_error, msg: "Reset password link is invalid or it has expired.")
