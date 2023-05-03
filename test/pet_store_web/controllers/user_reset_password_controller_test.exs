@@ -49,13 +49,12 @@ defmodule PetStoreWeb.UserResetPasswordControllerTest do
     end
 
     test "resets password once", %{conn: conn, user: user, token: token} do
-      conn =
-        put(conn, ~p"/users/reset_password/#{token}", %{
-          "user" => %{
-            "password" => "new valid password",
-            "password_confirmation" => "new valid password"
-          }
-        })
+      put(conn, ~p"/users/reset_password/#{token}", %{
+        "user" => %{
+          "password" => "new valid password",
+          "password_confirmation" => "new valid password"
+        }
+      })
 
       assert {:ok, _} =
                Accounts.fetch_user_by_email_and_password(user.email, "new valid password")
