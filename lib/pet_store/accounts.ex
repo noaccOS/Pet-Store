@@ -238,9 +238,16 @@ defmodule PetStore.Accounts do
   @doc """
   Gets the user with the given signed token.
   """
-  def get_user_by_token(token) do
-    {:ok, query} = UserToken.verify_api_token_query(token, @apicontext)
-    Repo.one(query)
+  def fetch_user_by_token(token) do
+    with {:ok, query} <- UserToken.verify_api_token_query(token, @apicontext) do
+      if user = Repo.one(query) do
+        {:ok, user}
+      else
+        :error
+      end
+    else
+      _ -> :error
+    end
   end
 
   @doc """

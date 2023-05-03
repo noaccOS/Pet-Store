@@ -335,7 +335,7 @@ defmodule PetStore.AccountsTest do
     end
   end
 
-  describe "get_user_by_token/1" do
+  describe "fetch_user_by_token/1" do
     setup do
       user = user_fixture()
       token = Accounts.generate_user_token(user)
@@ -343,17 +343,17 @@ defmodule PetStore.AccountsTest do
     end
 
     test "returns user by token", %{user: user, token: token} do
-      assert session_user = Accounts.get_user_by_token(token)
+      assert {:ok, session_user} = Accounts.fetch_user_by_token(token)
       assert session_user.id == user.id
     end
 
     test "does not return user for invalid token" do
-      refute Accounts.get_user_by_token("oops")
+      assert :error = Accounts.fetch_user_by_token("oops")
     end
 
     test "does not return user for expired token", %{token: token} do
       {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
-      refute Accounts.get_user_by_token(token)
+      assert :error = Accounts.fetch_user_by_token(token)
     end
   end
 
@@ -362,7 +362,7 @@ defmodule PetStore.AccountsTest do
       user = user_fixture()
       token = Accounts.generate_user_token(user)
       assert Accounts.delete_user_token(token) == :ok
-      refute Accounts.get_user_by_token(token)
+      assert :error = Accounts.fetch_user_by_token(token)
     end
   end
 

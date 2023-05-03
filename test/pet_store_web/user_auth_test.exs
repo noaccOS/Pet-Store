@@ -18,7 +18,7 @@ defmodule PetStoreWeb.UserAuthTest do
     test "stores the user token in the session", %{conn: conn, user: user} do
       conn = UserAuth.log_in_user(conn, user)
       assert token = conn.assigns[:user_token]
-      assert Accounts.get_user_by_token(token)
+      assert {:ok, _} = Accounts.fetch_user_by_token(token)
     end
   end
 

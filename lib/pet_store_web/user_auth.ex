@@ -50,7 +50,7 @@ defmodule PetStoreWeb.UserAuth do
 
   def load_user_from_auth(conn, _opts) do
     with ["Bearer " <> token] <- get_req_header(conn, "authorization"),
-         user when user != nil <- Accounts.get_user_by_token(token) do
+         {:ok, user} <- Accounts.fetch_user_by_token(token) do
       conn
       |> assign(:current_user, user)
       |> assign(:user_token, token)
