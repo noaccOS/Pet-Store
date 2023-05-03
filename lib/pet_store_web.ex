@@ -66,19 +66,11 @@ defmodule PetStoreWeb do
         }
       end
 
-      def message_ok() do
-        %{"status" => "ok"}
-      end
-
       def message_ok(%{msg: message}) do
         %{
           "status" => "ok",
           "message" => message
         }
-      end
-
-      def message_error() do
-        %{"status" => "error"}
       end
 
       def message_error(%{msg: message}) do

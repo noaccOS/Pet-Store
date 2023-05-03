@@ -34,7 +34,7 @@ defmodule PetStoreWeb.UserConfirmationController do
         # a warning message.
         case conn.assigns do
           %{current_user: %{confirmed_at: confirmed_at}} when not is_nil(confirmed_at) ->
-            render(conn, :message_ok)
+            render(conn, :message_ok, msg: nil)
 
           %{} ->
             render(conn, :message_error,
