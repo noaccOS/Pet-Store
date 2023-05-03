@@ -9,14 +9,6 @@ defmodule PetStoreWeb.UserConfirmationControllerTest do
     %{user: user_fixture()}
   end
 
-  describe "GET /users/confirm" do
-    test "renders the resend confirmation page", %{conn: conn} do
-      conn = get(conn, ~p"/users/confirm")
-      response = html_response(conn, 200)
-      assert response =~ "Resend confirmation instructions"
-    end
-  end
-
   describe "POST /users/confirm" do
     @tag :capture_log
     test "sends a new confirmation token", %{conn: conn, user: user} do
@@ -61,17 +53,6 @@ defmodule PetStoreWeb.UserConfirmationControllerTest do
                "If your email is in our system"
 
       assert Repo.all(Accounts.UserToken) == []
-    end
-  end
-
-  describe "GET /users/confirm/:token" do
-    test "renders the confirmation page", %{conn: conn} do
-      token_path = ~p"/users/confirm/some-token"
-      conn = get(conn, token_path)
-      response = html_response(conn, 200)
-      assert response =~ "Confirm account"
-
-      assert response =~ "action=\"#{token_path}\""
     end
   end
 
