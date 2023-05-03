@@ -329,19 +329,19 @@ defmodule PetStore.Accounts do
 
   ## Examples
 
-      iex> get_user_by_reset_password_token("validtoken")
-      %User{}
+      iex> fetch_user_by_reset_password_token("validtoken")
+      {:ok, %User{}}
 
-      iex> get_user_by_reset_password_token("invalidtoken")
-      nil
+      iex> fetch_user_by_reset_password_token("invalidtoken")
+      :error
 
   """
-  def get_user_by_reset_password_token(token) do
+  def fetch_user_by_reset_password_token(token) do
     with {:ok, query} <- UserToken.verify_email_token_query(token, "reset_password"),
          %User{} = user <- Repo.one(query) do
-      user
+      {:ok, user}
     else
-      _ -> nil
+      _ -> :error
     end
   end
 

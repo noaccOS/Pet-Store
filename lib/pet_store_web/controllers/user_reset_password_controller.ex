@@ -37,11 +37,12 @@ defmodule PetStoreWeb.UserResetPasswordController do
   defp get_user_by_reset_password_token(conn, _opts) do
     %{"token" => token} = conn.params
 
-    if user = Accounts.get_user_by_reset_password_token(token) do
-      conn |> assign(:user, user) |> assign(:token, token)
-    else
-      render(conn, :message_error, msg: "Reset password link is invalid or it has expired.")
-      # halt(conn)
+    case Accounts.fetch_user_by_reset_password_token(token) do
+      {:ok, user} ->
+        conn |> assign(:user, user) |> assign(:token, token)
+
+      :error ->
+        render(conn, :message_error, msg: "Reset password link is invalid or it has expired.")
     end
   end
 end
