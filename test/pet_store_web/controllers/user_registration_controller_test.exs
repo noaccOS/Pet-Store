@@ -13,15 +13,21 @@ defmodule PetStoreWeb.UserRegistrationControllerTest do
           "user" => valid_user_attributes(email: email)
         })
 
-      assert get_session(conn, :user_token)
-      assert redirected_to(conn) == ~p"/"
+      conn_token = conn.assigns[:user_token]
+      assert conn_token
 
-      # Now do a logged in request and assert on the menu
-      conn = get(conn, ~p"/")
-      response = html_response(conn, 200)
-      assert response =~ email
-      assert response =~ ~p"/users/settings"
-      assert response =~ ~p"/users/log_out"
+      response = json_response(conn, 200)
+      token = response["token"]
+      assert conn_token == token
+
+      conn =
+        build_conn()
+        |> Plug.Conn.put_req_header("authorization", "Bearer #{token}")
+        |> delete(~p"/users/log_out")
+
+      response = json_response(conn, 200)
+      assert response["status"] == "ok"
+      assert response["message"] == "User logged out successfully."
     end
 
     test "render errors for invalid data", %{conn: conn} do
@@ -30,10 +36,9 @@ defmodule PetStoreWeb.UserRegistrationControllerTest do
           "user" => %{"email" => "with spaces", "password" => "too short"}
         })
 
-      response = html_response(conn, 200)
-      assert response =~ "Register"
-      assert response =~ "must have the @ sign and no spaces"
-      assert response =~ "should be at least 12 character"
+      response = json_response(conn, 200)
+      assert response["status"] == "error"
+      assert response["message"] == "Error during user creation. Please try again."
     end
   end
 end
