@@ -119,10 +119,11 @@ defmodule PetStoreWeb.UserSettingsControllerTest do
       assert {:ok, _} = Accounts.fetch_user_by_email(user.email)
     end
 
-    test "redirects if user is not logged in", %{token: token} do
+    test "fails if user is not logged in", %{token: token} do
       conn = build_conn()
       conn = get(conn, ~p"/users/settings/confirm_email/#{token}")
-      assert redirected_to(conn) == ~p"/users/log_in"
+      %{status: status} = conn
+      assert status == 401
     end
   end
 end
