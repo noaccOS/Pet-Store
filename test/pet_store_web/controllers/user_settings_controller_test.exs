@@ -18,14 +18,12 @@ defmodule PetStoreWeb.UserSettingsControllerTest do
           }
         })
 
-      assert redirected_to(new_password_conn) == ~p"/users/settings"
+      assert new_password_conn.assigns[:user_token] != conn.assigns[:user_token]
 
-      assert get_session(new_password_conn, :user_token) != get_session(conn, :user_token)
+      assert json_response(new_password_conn, 200)["message"] == "Password updated successfully."
 
-      assert Phoenix.Flash.get(new_password_conn.assigns.flash, :info) =~
-               "Password updated successfully"
-
-      assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
+      assert {:ok, _} =
+               Accounts.fetch_user_by_email_and_password(user.email, "new valid password")
     end
 
     test "does not update password on invalid data", %{conn: conn} do
@@ -39,13 +37,9 @@ defmodule PetStoreWeb.UserSettingsControllerTest do
           }
         })
 
-      response = html_response(old_password_conn, 200)
-      assert response =~ "Settings"
-      assert response =~ "should be at least 12 character(s)"
-      assert response =~ "does not match password"
-      assert response =~ "is not valid"
+      assert json_response(old_password_conn, 200)["message"] =~ "Password not updated"
 
-      assert get_session(old_password_conn, :user_token) == get_session(conn, :user_token)
+      assert old_password_conn.assigns[:user_token] == conn.assigns[:user_token]
     end
   end
 
@@ -59,12 +53,10 @@ defmodule PetStoreWeb.UserSettingsControllerTest do
           "user" => %{"email" => unique_user_email()}
         })
 
-      assert redirected_to(conn) == ~p"/users/settings"
-
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
+      assert json_response(conn, 200)["message"] =~
                "A link to confirm your email"
 
-      assert Accounts.get_user_by_email(user.email)
+      assert {:ok, _} = Accounts.fetch_user_by_email(user.email)
     end
 
     test "does not update email on invalid data", %{conn: conn} do
@@ -75,10 +67,9 @@ defmodule PetStoreWeb.UserSettingsControllerTest do
           "user" => %{"email" => "with spaces"}
         })
 
-      response = html_response(conn, 200)
-      assert response =~ "Settings"
-      assert response =~ "must have the @ sign and no spaces"
-      assert response =~ "is not valid"
+      response = json_response(conn, 200)
+      assert response["message"] == "There has been an error trying to change the email."
+      assert response["status"] == "error"
     end
   end
 
@@ -95,31 +86,37 @@ defmodule PetStoreWeb.UserSettingsControllerTest do
     end
 
     test "updates the user email once", %{conn: conn, user: user, token: token, email: email} do
+      user_token = conn.assigns.user_token
       conn = get(conn, ~p"/users/settings/confirm_email/#{token}")
-      assert redirected_to(conn) == ~p"/users/settings"
+      response = json_response(conn, 200)
+      assert response["status"] == "ok"
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
+      assert response["message"] =~
                "Email changed successfully"
 
-      refute Accounts.get_user_by_email(user.email)
-      assert Accounts.get_user_by_email(email)
+      assert :error == Accounts.fetch_user_by_email(user.email)
+      assert {:ok, _} = Accounts.fetch_user_by_email(email)
 
-      conn = get(conn, ~p"/users/settings/confirm_email/#{token}")
+      conn =
+        build_conn()
+        |> Plug.Conn.put_req_header("authorization", "Bearer #{user_token}")
+        |> get(~p"/users/settings/confirm_email/#{token}")
 
-      assert redirected_to(conn) == ~p"/users/settings"
+      response = json_response(conn, 200)
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
+      assert response["status"] == "error"
+
+      assert response["message"] =~
                "Email change link is invalid or it has expired"
     end
 
     test "does not update email with invalid token", %{conn: conn, user: user} do
       conn = get(conn, ~p"/users/settings/confirm_email/oops")
-      assert redirected_to(conn) == ~p"/users/settings"
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
+      assert json_response(conn, 200)["message"] =~
                "Email change link is invalid or it has expired"
 
-      assert Accounts.get_user_by_email(user.email)
+      assert {:ok, _} = Accounts.fetch_user_by_email(user.email)
     end
 
     test "redirects if user is not logged in", %{token: token} do
