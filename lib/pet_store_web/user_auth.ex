@@ -24,11 +24,8 @@ defmodule PetStoreWeb.UserAuth do
   def log_out_user(conn) do
     token = conn.assigns[:user_token]
 
-    if token && Accounts.delete_user_token(token) do
-      update_in(conn.assigns, &Map.drop(&1, [:user_token, :current_user]))
-    else
-      conn
-    end
+    token && Accounts.delete_user_token(token)
+    update_in(conn.assigns, &Map.drop(&1, [:user_token, :current_user]))
   end
 
   @doc """
