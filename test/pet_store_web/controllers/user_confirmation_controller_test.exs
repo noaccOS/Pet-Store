@@ -56,9 +56,9 @@ defmodule PetStoreWeb.UserConfirmationControllerTest do
 
       # When not logged in
       conn = post(conn, ~p"/users/confirm/#{token}")
-      %{resp_body: body} = conn
-
-      assert body =~ "User confirmation link is invalid or it has expired."
+      resp = json_response(conn, 200)
+      assert resp["status"] == "error"
+      assert resp["message"] == "User confirmation link is invalid or it has expired."
 
       # When logged in
       conn =
@@ -66,16 +66,17 @@ defmodule PetStoreWeb.UserConfirmationControllerTest do
         |> log_in_user(user)
         |> post(~p"/users/confirm/#{token}")
 
-      %{resp_body: body} = conn
-      assert body =~ ~s("status":"ok")
-      refute body =~ "User confirmation link is invalid or it has expired."
+      resp = json_response(conn, 200)
+      assert resp["status"] == "ok"
+      refute resp["message"] == "User confirmation link is invalid or it has expired."
     end
 
     test "does not confirm email with invalid token", %{conn: conn, user: user} do
       conn = post(conn, ~p"/users/confirm/oops")
-      %{resp_body: body} = conn
+      resp = json_response(conn, 200)
 
-      assert body =~ "User confirmation link is invalid or it has expired."
+      assert resp["status"] == "error"
+      assert resp["message"] == "User confirmation link is invalid or it has expired."
       refute Accounts.fetch_user!(user.id).confirmed_at
     end
   end
