@@ -50,11 +50,12 @@ defmodule PetStoreWeb.UserSessionControllerTest do
       assert response["message"] == "User logged out successfully."
     end
 
-    test "succeeds even if the user is not logged in", %{conn: conn} do
+    test "fails if the user is not logged in", %{conn: conn} do
       conn = delete(conn, ~p"/users/log_out")
-      assert redirected_to(conn) == ~p"/"
-      refute get_session(conn, :user_token)
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Logged out successfully"
+
+      %{status: status, resp_body: body} = conn
+      assert status == 401
+      assert body == "Unauthorized"
     end
   end
 end
