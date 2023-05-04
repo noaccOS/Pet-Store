@@ -8,7 +8,7 @@ defmodule PetStore.AccountsTest do
 
   describe "fetch_user_by_email/1" do
     test "does not return the user if the email does not exist" do
-      assert :error = Accounts.fetch_user_by_email("unknown@example.com")
+      assert {:error, :not_found} = Accounts.fetch_user_by_email("unknown@example.com")
     end
 
     test "returns the user if the email exists" do
@@ -19,13 +19,15 @@ defmodule PetStore.AccountsTest do
 
   describe "fetch_user_by_email_and_password/2" do
     test "does not return the user if the email does not exist" do
-      assert :error =
+      assert {:error, :not_found} =
                Accounts.fetch_user_by_email_and_password("unknown@example.com", "hello world!")
     end
 
     test "does not return the user if the password is not valid" do
       user = user_fixture()
-      assert :error = Accounts.fetch_user_by_email_and_password(user.email, "invalid")
+
+      assert {:error, :not_found} =
+               Accounts.fetch_user_by_email_and_password(user.email, "invalid")
     end
 
     test "returns the user if the email and password are valid" do
@@ -348,12 +350,12 @@ defmodule PetStore.AccountsTest do
     end
 
     test "does not return user for invalid token" do
-      assert :error = Accounts.fetch_user_by_token("oops")
+      assert {:error, :not_found} = Accounts.fetch_user_by_token("oops")
     end
 
     test "does not return user for expired token", %{token: token} do
       {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
-      assert :error = Accounts.fetch_user_by_token(token)
+      assert {:error, :not_found} = Accounts.fetch_user_by_token(token)
     end
   end
 
@@ -362,7 +364,7 @@ defmodule PetStore.AccountsTest do
       user = user_fixture()
       token = Accounts.generate_user_token(user)
       assert Accounts.delete_user_token(token) == :ok
-      assert :error = Accounts.fetch_user_by_token(token)
+      assert {:error, :not_found} = Accounts.fetch_user_by_token(token)
     end
   end
 
@@ -456,13 +458,13 @@ defmodule PetStore.AccountsTest do
     end
 
     test "does not return the user with invalid token", %{user: user} do
-      assert :error = Accounts.fetch_user_by_reset_password_token("oops")
+      assert {:error, :not_found} = Accounts.fetch_user_by_reset_password_token("oops")
       assert Repo.get_by(UserToken, user_id: user.id)
     end
 
     test "does not return the user if token expired", %{user: user, token: token} do
       {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
-      assert :error = Accounts.fetch_user_by_reset_password_token(token)
+      assert {:error, :not_found} = Accounts.fetch_user_by_reset_password_token(token)
       assert Repo.get_by(UserToken, user_id: user.id)
     end
   end

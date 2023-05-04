@@ -21,14 +21,14 @@ defmodule PetStore.Accounts do
       {:ok, %User{}}
 
       iex> fetch_user_by_email("unknown@example.com")
-      :error
+      {:error, :not_found}
 
   """
   def fetch_user_by_email(email) when is_binary(email) do
     with %User{} = user <- Repo.get_by(User, email: email) do
       {:ok, user}
     else
-      _ -> :error
+      _ -> {:error, :not_found}
     end
   end
 
@@ -41,7 +41,7 @@ defmodule PetStore.Accounts do
       {:ok, %User{}}
 
       iex> fetch_user_by_email_and_password("foo@example.com", "invalid_password")
-      :error
+      {:error, :not_found}
 
   """
   def fetch_user_by_email_and_password(email, password)
@@ -49,7 +49,7 @@ defmodule PetStore.Accounts do
     with {:ok, user} <- fetch_user_by_email(email) do
       if User.valid_password?(user, password),
         do: {:ok, user},
-        else: :error
+        else: {:error, :not_found}
     end
   end
 
@@ -239,14 +239,11 @@ defmodule PetStore.Accounts do
   Gets the user with the given signed token.
   """
   def fetch_user_by_token(token) do
-    with {:ok, query} <- UserToken.verify_api_token_query(token, @apicontext) do
-      if user = Repo.one(query) do
-        {:ok, user}
-      else
-        :error
-      end
+    with {:ok, query} <- UserToken.verify_api_token_query(token, @apicontext),
+         %User{} = user <- Repo.one(query) do
+      {:ok, user}
     else
-      _ -> :error
+      _ -> {:error, :not_found}
     end
   end
 
@@ -333,7 +330,7 @@ defmodule PetStore.Accounts do
       {:ok, %User{}}
 
       iex> fetch_user_by_reset_password_token("invalidtoken")
-      :error
+      {:error, :not_found}
 
   """
   def fetch_user_by_reset_password_token(token) do
@@ -341,7 +338,7 @@ defmodule PetStore.Accounts do
          %User{} = user <- Repo.one(query) do
       {:ok, user}
     else
-      _ -> :error
+      _ -> {:error, :not_found}
     end
   end
 

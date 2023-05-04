@@ -41,7 +41,7 @@ defmodule PetStoreWeb.UserResetPasswordController do
       {:ok, user} ->
         conn |> assign(:current_user, user) |> assign(:user_token, token)
 
-      :error ->
+      {:error, _} ->
         conn
         |> render(:message_error, msg: "Reset password link is invalid or it has expired.")
         |> halt()

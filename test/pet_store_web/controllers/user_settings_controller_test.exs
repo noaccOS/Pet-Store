@@ -94,7 +94,7 @@ defmodule PetStoreWeb.UserSettingsControllerTest do
       assert response["message"] =~
                "Email changed successfully"
 
-      assert :error == Accounts.fetch_user_by_email(user.email)
+      assert {:error, :not_found} == Accounts.fetch_user_by_email(user.email)
       assert {:ok, _} = Accounts.fetch_user_by_email(email)
 
       conn =
