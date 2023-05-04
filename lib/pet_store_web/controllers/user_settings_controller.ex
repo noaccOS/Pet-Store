@@ -44,7 +44,7 @@ defmodule PetStoreWeb.UserSettingsController do
         render(conn, :re_login, msg: "Password updated successfully.", token: token)
 
       {:error, _changeset} ->
-        render(conn, :message_error, msg: "Error. Password not updated")
+        render(conn, :message_error, msg: "Error. Password not updated.")
     end
   end
 
