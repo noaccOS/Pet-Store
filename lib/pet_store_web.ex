@@ -73,10 +73,23 @@ defmodule PetStoreWeb do
         }
       end
 
+      def data(%{data: data}) do
+        %{
+          "data" => to_data(data)
+        }
+      end
+
       def message_error(%{msg: message}) do
         %{
           "status" => "error",
           "message" => message
+        }
+      end
+
+      defp to_data(%PetStore.Accounts.User{} = user) do
+        %{
+          id: user.id,
+          email: user.email
         }
       end
     end
