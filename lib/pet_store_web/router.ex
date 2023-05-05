@@ -5,7 +5,6 @@ defmodule PetStoreWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
-    plug :load_user_from_auth
   end
 
   scope "/", PetStoreWeb do

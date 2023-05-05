@@ -35,24 +35,37 @@ defmodule PetStoreWeb.UserAuth do
   they use the application at all, here would be a good place.
   """
   def require_authenticated_user(conn, _opts) do
-    if conn.assigns[:current_user] do
-      conn
-    else
-      conn
-      |> resp(401, "Unauthorized")
-      |> send_resp()
-      |> halt()
+    case try_authenticate(conn) do
+      {:ok, token, user} ->
+        conn
+        |> assign(:current_user, user)
+        |> assign(:user_token, token)
+
+      {:error, status} ->
+        conn
+        |> resp(status, "")
+        |> send_resp()
+        |> halt()
     end
   end
 
-  def load_user_from_auth(conn, _opts) do
-    with ["Bearer " <> token] <- get_req_header(conn, "authorization"),
-         {:ok, user} <- Accounts.fetch_user_by_token(token) do
-      conn
-      |> assign(:current_user, user)
-      |> assign(:user_token, token)
+  defp try_authenticate(conn) do
+    with {:ok, token} <- load_token_from_auth(get_req_header(conn, "authorization")),
+         {:ok, user} <- load_user_by_token(token) do
+      {:ok, token, user}
     else
-      _ -> conn
+      {:error, status} -> {:error, status}
+    end
+  end
+
+  defp load_token_from_auth(["Bearer " <> token]), do: {:ok, token}
+  defp load_token_from_auth([]), do: {:error, :unauthorized}
+  defp load_token_from_auth(_), do: {:error, :bad_request}
+
+  defp load_user_by_token(token) do
+    case Accounts.fetch_user_by_token(token) do
+      {:ok, user} -> {:ok, user}
+      {:error, :not_found} -> {:error, :forbidden}
     end
   end
 end

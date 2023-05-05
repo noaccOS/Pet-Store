@@ -53,9 +53,8 @@ defmodule PetStoreWeb.UserSessionControllerTest do
     test "fails if the user is not logged in", %{conn: conn} do
       conn = delete(conn, ~p"/users/log_out")
 
-      %{status: status, resp_body: body} = conn
+      %{status: status} = conn
       assert status == 401
-      assert body == "Unauthorized"
     end
   end
 end
