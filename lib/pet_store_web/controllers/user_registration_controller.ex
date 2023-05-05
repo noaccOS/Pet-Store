@@ -4,21 +4,19 @@ defmodule PetStoreWeb.UserRegistrationController do
   alias PetStore.Accounts
   alias PetStoreWeb.UserAuth
 
+  action_fallback PetStoreWeb.FallbackController
+
   def create(conn, %{"user" => user_params}) do
-    case Accounts.register_user(user_params) do
-      {:ok, user} ->
-        {:ok, _} =
-          Accounts.deliver_user_confirmation_instructions(
-            user,
-            &"POST #{url(~p[/users/confirm/#{&1}])}"
-          )
+    with {:ok, user} <- Accounts.register_user(user_params) do
+      {:ok, _} =
+        Accounts.deliver_user_confirmation_instructions(
+          user,
+          &"POST #{url(~p[/users/confirm/#{&1}])}"
+        )
 
-        conn = UserAuth.log_in_user(conn, user)
-        token = conn.assigns.user_token
-        render(conn, :register, token: token)
-
-      {:error, _} ->
-        render(conn, :message_error, msg: "Error during user creation. Please try again.")
+      conn = UserAuth.log_in_user(conn, user)
+      token = conn.assigns.user_token
+      render(conn, :register, token: token)
     end
   end
 end

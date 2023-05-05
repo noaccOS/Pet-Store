@@ -36,9 +36,9 @@ defmodule PetStoreWeb.UserRegistrationControllerTest do
           "user" => %{"email" => "with spaces", "password" => "too short"}
         })
 
-      response = json_response(conn, 200)
-      assert response["status"] == "error"
-      assert response["message"] == "Error during user creation. Please try again."
+      errors = json_response(conn, 422)["errors"]
+      assert "must have the @ sign and no spaces" in errors["email"]
+      assert "should be at least 12 character(s)" in errors["password"]
     end
   end
 end
