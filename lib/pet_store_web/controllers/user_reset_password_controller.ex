@@ -3,7 +3,7 @@ defmodule PetStoreWeb.UserResetPasswordController do
 
   alias PetStore.Accounts
 
-  plug :get_user_by_reset_password_token when action == :update
+  action_fallback PetStoreWeb.FallbackController
 
   def create(conn, %{"user" => %{"email" => email}}) do
     with {:ok, user} <- Accounts.fetch_user_by_email(email) do
@@ -25,26 +25,11 @@ defmodule PetStoreWeb.UserResetPasswordController do
   # Do not log in the user after reset password to avoid a
   # leaked token giving the user access to the account.
   def update(conn, %{"user" => user_params}) do
-    case Accounts.reset_user_password(conn.assigns.current_user, user_params) do
-      {:ok, _} ->
-        render(conn, :message_ok, msg: "Password reset successfully.")
-
-      {:error, _changeset} ->
-        render(conn, :message_error, msg: "Error encountered during password reset.")
-    end
-  end
-
-  defp get_user_by_reset_password_token(conn, _opts) do
     %{"token" => token} = conn.params
 
-    case Accounts.fetch_user_by_reset_password_token(token) do
-      {:ok, user} ->
-        conn |> assign(:current_user, user) |> assign(:user_token, token)
-
-      {:error, _} ->
-        conn
-        |> render(:message_error, msg: "Reset password link is invalid or it has expired.")
-        |> halt()
+    with {:ok, orig_user} <- Accounts.fetch_user_by_reset_password_token(token),
+         {:ok, user} <- Accounts.reset_user_password(orig_user, user_params) do
+      render(conn, :data, data: user)
     end
   end
 end

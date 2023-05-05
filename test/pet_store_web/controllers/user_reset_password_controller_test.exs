@@ -69,17 +69,15 @@ defmodule PetStoreWeb.UserResetPasswordControllerTest do
           }
         })
 
-      response = json_response(conn, 200)
-      assert response["status"] == "error"
-      assert response["message"] == "Error encountered during password reset."
+      errors = json_response(conn, 422)["errors"]
+      assert "does not match password" in errors["password_confirmation"]
+      assert "should be at least 12 character(s)" in errors["password"]
     end
 
     test "does not reset password with invalid token", %{conn: conn} do
-      conn = put(conn, ~p"/users/reset_password/oops")
+      conn = put(conn, ~p"/users/reset_password/oops", %{"user" => %{}})
 
-      response = json_response(conn, 200)
-      assert response["status"] == "error"
-      assert response["message"] == "Reset password link is invalid or it has expired."
+      assert json_response(conn, 404)
     end
   end
 end
