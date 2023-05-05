@@ -3,6 +3,8 @@ defmodule PetStoreWeb.UserConfirmationController do
 
   alias PetStore.Accounts
 
+  action_fallback PetStoreWeb.FallbackController
+
   def create(conn, %{"user" => %{"email" => email}}) do
     with {:ok, user} <- Accounts.fetch_user_by_email(email) do
       Accounts.deliver_user_confirmation_instructions(
@@ -37,9 +39,7 @@ defmodule PetStoreWeb.UserConfirmationController do
             render(conn, :message_ok, msg: nil)
 
           %{} ->
-            render(conn, :message_error,
-              msg: "User confirmation link is invalid or it has expired."
-            )
+            {:error, :not_found}
         end
     end
   end

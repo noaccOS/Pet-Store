@@ -1,46 +1,77 @@
-defmodule PetStoreWeb.UserConfirmationController do
-  use PetStoreWeb, :controller
+defmodule PetStoreWeb.UserConfirmationControllerTest do
+  use PetStoreWeb.ConnCase, async: true
 
   alias PetStore.Accounts
+  alias PetStore.Repo
+  import PetStore.AccountsFixtures
+  require IEx
 
-  def create(conn, %{"user" => %{"email" => email}}) do
-    with {:ok, user} <- Accounts.fetch_user_by_email(email) do
-      Accounts.deliver_user_confirmation_instructions(
-        user,
-        &"POST #{url(~p[/users/confirm/#{&1}])}"
-      )
-    end
-
-    render(
-      conn,
-      :message_ok,
-      msg:
-        "If your email is in our system and it has not been confirmed yet, " <>
-          "you will receive an email with instructions shortly."
-    )
+  setup do
+    %{user: user_fixture()}
   end
 
-  # Do not log in the user after confirmation to avoid a
-  # leaked token giving the user access to the account.
-  def update(conn, %{"token" => token}) do
-    case Accounts.confirm_user(token) do
-      {:ok, _} ->
-        render(conn, :message_ok, msg: "User confirmed successfully.")
+  describe "POST /users/confirm" do
+    @tag :capture_log
+    test "sends a new confirmation token", %{conn: conn, user: user} do
+      post(conn, ~p"/users/confirm", %{
+        "user" => %{"email" => user.email}
+      })
 
-      :error ->
-        # If there is a current user and the account was already confirmed,
-        # then odds are that the confirmation link was already visited, either
-        # by some automation or by the user themselves, so we redirect without
-        # a warning message.
-        case conn.assigns do
-          %{current_user: %{confirmed_at: confirmed_at}} when not is_nil(confirmed_at) ->
-            render(conn, :message_ok, msg: nil)
+      assert Repo.get_by!(Accounts.UserToken, user_id: user.id).context == "confirm"
+    end
 
-          %{} ->
-            render(conn, :message_error,
-              msg: "User confirmation link is invalid or it has expired."
-            )
-        end
+    test "does not send confirmation token if User is confirmed", %{conn: conn, user: user} do
+      Repo.update!(Accounts.User.confirm_changeset(user))
+
+      post(conn, ~p"/users/confirm", %{
+        "user" => %{"email" => user.email}
+      })
+
+      refute Repo.get_by(Accounts.UserToken, user_id: user.id)
+    end
+
+    test "does not send confirmation token if email is invalid", %{conn: conn} do
+      post(conn, ~p"/users/confirm", %{
+        "user" => %{"email" => "unknown@example.com"}
+      })
+
+      assert Repo.all(Accounts.UserToken) == []
+    end
+  end
+
+  describe "POST /users/confirm/:token" do
+    test "confirms the given token once", %{conn: conn, user: user} do
+      token =
+        extract_user_token(fn url ->
+          Accounts.deliver_user_confirmation_instructions(user, url)
+        end)
+
+      conn = post(conn, ~p"/users/confirm/#{token}")
+
+      user = Accounts.fetch_user!(user.id)
+
+      assert user.confirmed_at
+      refute conn.assigns[:user_token]
+      assert Repo.all(Accounts.UserToken) == []
+
+      # When not logged in
+      conn = post(conn, ~p"/users/confirm/#{token}")
+      assert json_response(conn, 404)
+
+      # When logged in
+      conn =
+        build_conn()
+        |> log_in_user(user)
+        |> post(~p"/users/confirm/#{token}")
+
+      assert json_response(conn, 200)
+    end
+
+    test "does not confirm email with invalid token", %{conn: conn, user: user} do
+      conn = post(conn, ~p"/users/confirm/oops")
+
+      assert json_response(conn, 404)
+      refute Accounts.fetch_user!(user.id).confirmed_at
     end
   end
 end
