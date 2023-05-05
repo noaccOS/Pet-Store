@@ -53,8 +53,6 @@ defmodule PetStoreWeb.UserAuth do
     with {:ok, token} <- load_token_from_auth(get_req_header(conn, "authorization")),
          {:ok, user} <- load_user_by_token(token) do
       {:ok, token, user}
-    else
-      {:error, status} -> {:error, status}
     end
   end
 
