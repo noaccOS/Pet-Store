@@ -6,6 +6,7 @@ defmodule PetStore.Accounts.User do
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
+    field :admin_level, :integer
     field :confirmed_at, :naive_datetime
 
     timestamps()
