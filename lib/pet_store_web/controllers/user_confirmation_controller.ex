@@ -29,7 +29,7 @@ defmodule PetStoreWeb.UserConfirmationController do
       {:ok, _} ->
         render(conn, :message_ok, msg: "User confirmed successfully.")
 
-      :error ->
+      {:error, :not_found} ->
         # If there is a current user and the account was already confirmed,
         # then odds are that the confirmation link was already visited, either
         # by some automation or by the user themselves, so we redirect without

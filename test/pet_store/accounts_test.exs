@@ -220,20 +220,22 @@ defmodule PetStore.AccountsTest do
     end
 
     test "does not update email with invalid token", %{user: user} do
-      assert Accounts.update_user_email(user, "oops") == :error
+      assert Accounts.update_user_email(user, "oops") == {:error, :not_found}
       assert Repo.get!(User, user.id).email == user.email
       assert Repo.get_by(UserToken, user_id: user.id)
     end
 
     test "does not update email if user email changed", %{user: user, token: token} do
-      assert Accounts.update_user_email(%{user | email: "current@example.com"}, token) == :error
+      assert Accounts.update_user_email(%{user | email: "current@example.com"}, token) ==
+               {:error, :not_found}
+
       assert Repo.get!(User, user.id).email == user.email
       assert Repo.get_by(UserToken, user_id: user.id)
     end
 
     test "does not update email if token expired", %{user: user, token: token} do
       {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
-      assert Accounts.update_user_email(user, token) == :error
+      assert Accounts.update_user_email(user, token) == {:error, :not_found}
       assert Repo.get!(User, user.id).email == user.email
       assert Repo.get_by(UserToken, user_id: user.id)
     end
@@ -408,14 +410,14 @@ defmodule PetStore.AccountsTest do
     end
 
     test "does not confirm with invalid token", %{user: user} do
-      assert Accounts.confirm_user("oops") == :error
+      assert Accounts.confirm_user("oops") == {:error, :not_found}
       refute Repo.get!(User, user.id).confirmed_at
       assert Repo.get_by(UserToken, user_id: user.id)
     end
 
     test "does not confirm email if token expired", %{user: user, token: token} do
       {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
-      assert Accounts.confirm_user(token) == :error
+      assert Accounts.confirm_user(token) == {:error, :not_found}
       refute Repo.get!(User, user.id).confirmed_at
       assert Repo.get_by(UserToken, user_id: user.id)
     end

@@ -151,7 +151,7 @@ defmodule PetStore.Accounts do
          {:ok, _} <- Repo.transaction(user_email_multi(user, email, context)) do
       :ok
     else
-      _ -> :error
+      _ -> {:error, :not_found}
     end
   end
 
@@ -293,7 +293,7 @@ defmodule PetStore.Accounts do
          {:ok, %{user: user}} <- Repo.transaction(confirm_user_multi(user)) do
       {:ok, user}
     else
-      _ -> :error
+      _ -> {:error, :not_found}
     end
   end
 
