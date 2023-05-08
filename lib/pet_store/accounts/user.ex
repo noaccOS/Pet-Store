@@ -37,9 +37,10 @@ defmodule PetStore.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:email, :password, :admin_level])
     |> validate_email(opts)
     |> validate_password(opts)
+    |> validate_admin_level(opts)
   end
 
   defp validate_email(changeset, opts) do
@@ -59,6 +60,15 @@ defmodule PetStore.Accounts.User do
     # |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")
     # |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
     |> maybe_hash_password(opts)
+  end
+
+  defp validate_admin_level(changeset, opts) do
+    changeset
+    |> validate_inclusion(:admin_level, 0..5, message: "invalid range")
+    |> validate_number(:admin_level,
+      less_than_or_equal_to: Keyword.get(opts, :max_admin_level, 0),
+      message: "insufficient permissions"
+    )
   end
 
   defp maybe_hash_password(changeset, opts) do

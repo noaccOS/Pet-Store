@@ -83,6 +83,8 @@ defmodule PetStore.Accounts do
 
   @doc """
   Registers a user.
+  If the registration is done by an admin account, the new user may have an admin level <= the value
+  of the account creating it.
 
   ## Examples
 
@@ -93,10 +95,19 @@ defmodule PetStore.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def register_user(attrs) do
+  def register_user(attrs, creator \\ nil) do
+    max_admin_level = get_in(creator, [Access.key!(:admin_level)]) || 0
+
     %User{}
-    |> User.registration_changeset(attrs)
+    |> User.registration_changeset(attrs, max_admin_level: max_admin_level)
+    |> maybe_confirm_user(creator)
     |> Repo.insert()
+  end
+
+  defp maybe_confirm_user(changeset, creator) do
+    if creator,
+      do: User.confirm_changeset(changeset),
+      else: changeset
   end
 
   @doc """

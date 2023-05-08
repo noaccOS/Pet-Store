@@ -10,6 +10,7 @@ defmodule PetStoreWeb.Router do
   scope "/", PetStoreWeb do
     pipe_through [:api, :require_authenticated_user]
 
+    post "/users/register_admin", UserRegistrationController, :create_admin
     put "/users/settings", UserSettingsController, :update
     get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
 
