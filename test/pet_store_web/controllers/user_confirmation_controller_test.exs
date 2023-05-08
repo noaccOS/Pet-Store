@@ -64,7 +64,7 @@ defmodule PetStoreWeb.UserConfirmationControllerTest do
         |> log_in_user(user)
         |> post(~p"/users/confirm/#{token}")
 
-      assert json_response(conn, 200)
+      assert json_response(conn, 404)
     end
 
     test "does not confirm email with invalid token", %{conn: conn, user: user} do

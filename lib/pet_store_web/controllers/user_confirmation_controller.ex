@@ -25,22 +25,8 @@ defmodule PetStoreWeb.UserConfirmationController do
   # Do not log in the user after confirmation to avoid a
   # leaked token giving the user access to the account.
   def update(conn, %{"token" => token}) do
-    case Accounts.confirm_user(token) do
-      {:ok, _} ->
-        render(conn, :message_ok, msg: "User confirmed successfully.")
-
-      {:error, :not_found} ->
-        # If there is a current user and the account was already confirmed,
-        # then odds are that the confirmation link was already visited, either
-        # by some automation or by the user themselves, so we redirect without
-        # a warning message.
-        case conn.assigns do
-          %{current_user: %{confirmed_at: confirmed_at}} when not is_nil(confirmed_at) ->
-            render(conn, :message_ok, msg: nil)
-
-          %{} ->
-            {:error, :not_found}
-        end
+    with {:ok, _} <- Accounts.confirm_user(token) do
+      render(conn, :message_ok, msg: "User confirmed successfully.")
     end
   end
 end
