@@ -37,7 +37,11 @@ defmodule PetStoreWeb.UserSettingsControllerTest do
           }
         })
 
-      assert json_response(old_password_conn, 200)["message"] =~ "Password not updated"
+      # Erros assertions
+      errors = json_response(old_password_conn, 422)["errors"]
+      assert "is not valid" in errors["current_password"]
+      assert "should be at least 12 character(s)" in errors["password"]
+      assert "does not match password" in errors["password_confirmation"]
 
       assert old_password_conn.assigns[:user_token] == conn.assigns[:user_token]
     end
@@ -67,9 +71,9 @@ defmodule PetStoreWeb.UserSettingsControllerTest do
           "user" => %{"email" => "with spaces"}
         })
 
-      response = json_response(conn, 200)
-      assert response["message"] == "There has been an error trying to change the email."
-      assert response["status"] == "error"
+      errors = json_response(conn, 422)["errors"]
+      assert "is not valid" in errors["current_password"]
+      assert "must have the @ sign and no spaces" in errors["email"]
     end
   end
 
@@ -102,19 +106,13 @@ defmodule PetStoreWeb.UserSettingsControllerTest do
         |> Plug.Conn.put_req_header("authorization", "Bearer #{user_token}")
         |> get(~p"/users/settings/confirm_email/#{token}")
 
-      response = json_response(conn, 200)
-
-      assert response["status"] == "error"
-
-      assert response["message"] =~
-               "Email change link is invalid or it has expired"
+      assert json_response(conn, 404)
     end
 
     test "does not update email with invalid token", %{conn: conn, user: user} do
       conn = get(conn, ~p"/users/settings/confirm_email/oops")
 
-      assert json_response(conn, 200)["message"] =~
-               "Email change link is invalid or it has expired"
+      assert json_response(conn, 404)
 
       assert {:ok, _} = Accounts.fetch_user_by_email(user.email)
     end
