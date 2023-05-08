@@ -34,9 +34,7 @@ defmodule PetStoreWeb.UserSessionControllerTest do
           "user" => %{"email" => user.email, "password" => "invalid_password"}
         })
 
-      response = json_response(conn, 200)
-      assert response["status"] == "error"
-      assert response["message"] == "Invalid email or password"
+      assert json_response(conn, 404)
     end
   end
 

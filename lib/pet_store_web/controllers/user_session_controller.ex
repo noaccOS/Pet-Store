@@ -4,6 +4,8 @@ defmodule PetStoreWeb.UserSessionController do
   alias PetStore.Accounts
   alias PetStoreWeb.UserAuth
 
+  action_fallback PetStoreWeb.FallbackController
+
   def create(conn, %{"user" => user_params}) do
     %{"email" => email, "password" => password} = user_params
 
@@ -11,9 +13,6 @@ defmodule PetStoreWeb.UserSessionController do
       conn = UserAuth.log_in_user(conn, user, user_params)
       token = conn.assigns.user_token
       render(conn, :login, token: token)
-    else
-      # In order to prevent user enumeration attacks, don't disclose whether the email is registered.
-      _ -> render(conn, :message_error, msg: "Invalid email or password")
     end
   end
 
