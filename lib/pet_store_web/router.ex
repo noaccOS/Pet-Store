@@ -31,6 +31,8 @@ defmodule PetStoreWeb.Router do
     post "/users/log_in", UserSessionController, :create
     post "/users/reset_password", UserResetPasswordController, :create
     put "/users/reset_password/:token", UserResetPasswordController, :update
+
+    resources "/pets", PetController, except: [:new, :edit]
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
