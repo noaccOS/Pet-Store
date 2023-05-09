@@ -8,6 +8,31 @@ defmodule PetStoreWeb.UserSettingsController do
 
   action_fallback PetStoreWeb.FallbackController
 
+  # Updates email address for lower-admin_level accounts
+  def update(conn, %{"action" => "update_email", "target" => target_email, "value" => new_email}) do
+    with {:ok, target} <-
+           Accounts.maybe_redacted_user_by_email(target_email, conn.assigns.current_user),
+         email_changeset = Accounts.change_user_email(target, %{email: new_email}),
+         {:ok, new_user} <- Ecto.Changeset.apply_action(email_changeset, :update) do
+      token = Accounts.generate_user_token(target)
+
+      Accounts.deliver_user_update_email_instructions(
+        new_user,
+        target.email,
+        &"""
+        GET #{url(~p[/users/settings/confirm_email/#{&1}])}
+        Authorization: Bearer #{token}
+        """
+      )
+
+      render(
+        conn,
+        :message_ok,
+        msg: "A link to confirm your email change has been sent to the new address."
+      )
+    end
+  end
+
   def update(conn, %{"action" => "update_email"} = params) do
     %{"current_password" => password, "user" => user_params} = params
     user = conn.assigns.current_user
