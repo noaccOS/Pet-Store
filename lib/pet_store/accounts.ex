@@ -28,6 +28,16 @@ defmodule PetStore.Accounts do
     Repo.fetch_by(User, email: email)
   end
 
+  def maybe_redacted_user_by_email(email, caller) when is_binary(email) do
+    case fetch_user_by_email(email) do
+      {:ok, %User{admin_level: admin_level} = user} when admin_level < caller.admin_level ->
+        {:ok, user}
+
+      _ ->
+        {:error, :forbidden}
+    end
+  end
+
   @doc """
   Gets a user by email and password.
 

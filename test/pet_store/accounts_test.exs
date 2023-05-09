@@ -17,6 +17,27 @@ defmodule PetStore.AccountsTest do
     end
   end
 
+  describe "maybe_redacted_user_by_email/2" do
+    test "does not return the user if the email does not exist" do
+      caller = %User{admin_level: 5}
+
+      assert {:error, :forbidden} =
+               Accounts.maybe_redacted_user_by_email("unknown@example.com", caller)
+    end
+
+    test "returns the user if the email exists and the caller has suffcient permissions" do
+      %{id: id} = user = user_fixture()
+      caller = %User{admin_level: 2}
+      assert {:ok, %User{id: ^id}} = Accounts.maybe_redacted_user_by_email(user.email, caller)
+    end
+
+    test "does not return the user if the email exists but the caller does not have suffcient permissions" do
+      user = user_fixture()
+      caller = %User{admin_level: 0}
+      assert {:error, :forbidden} = Accounts.maybe_redacted_user_by_email(user.email, caller)
+    end
+  end
+
   describe "fetch_user_by_email_and_password/2" do
     test "does not return the user if the email does not exist" do
       assert {:error, :not_found} =
