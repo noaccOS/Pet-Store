@@ -40,5 +40,19 @@ defmodule PetStoreWeb.UserRegistrationControllerTest do
       assert "must have the @ sign and no spaces" in errors["email"]
       assert "should be at least 12 character(s)" in errors["password"]
     end
+
+    test "doesn't log the user in if already authenticated", %{conn: conn} do
+      %{conn: conn} = register_and_log_in_user(%{conn: conn})
+
+      email = unique_user_email()
+
+      conn =
+        post(conn, ~p"/users/register", %{
+          "user" => valid_user_attributes(email: email)
+        })
+
+      response = json_response(conn, 200)
+      assert response["data"]["email"] == email
+    end
   end
 end
