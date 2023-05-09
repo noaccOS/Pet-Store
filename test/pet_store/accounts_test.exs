@@ -116,6 +116,7 @@ defmodule PetStore.AccountsTest do
       user_attrs = valid_user_attributes(admin_level: admin_level)
       {:ok, user} = Accounts.register_user(user_attrs, creator)
       assert user.admin_level == admin_level
+      assert user.confirmed_at
     end
 
     test "cannot register an admin level higher than itself" do
@@ -127,6 +128,14 @@ defmodule PetStore.AccountsTest do
       {:error, changeset} = Accounts.register_user(user_attrs, creator)
 
       assert "insufficient permissions" in errors_on(changeset).admin_level
+    end
+
+    test "normal user doesn't confirm newly created user" do
+      creator = %User{admin_level: 0}
+
+      user_attrs = valid_user_attributes()
+      {:ok, user} = Accounts.register_user(user_attrs, creator)
+      refute user.confirmed_at
     end
   end
 

@@ -105,7 +105,7 @@ defmodule PetStore.Accounts do
   end
 
   defp maybe_confirm_user(changeset, creator) do
-    if creator,
+    if creator && creator.admin_level > 0,
       do: User.confirm_changeset(changeset),
       else: changeset
   end
