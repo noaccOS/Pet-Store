@@ -5,7 +5,7 @@ defmodule PetStore.Repo.Migrations.CreatePets do
     create table(:pets) do
       add :name, :string
       add :birthday, :date
-      add :species, references(:species, on_delete: :nothing)
+      add :species, references(:species, type: :string, column: :name, on_delete: :nothing)
 
       timestamps()
     end
