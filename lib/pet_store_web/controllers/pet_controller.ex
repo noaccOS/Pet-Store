@@ -15,7 +15,7 @@ defmodule PetStoreWeb.PetController do
     with {:ok, %Pet{} = pet} <- Animals.create_pet(pet_params) do
       conn
       |> put_status(:created)
-      |> put_resp_header("location", ~p"/api/pets/#{pet}")
+      |> put_resp_header("location", ~p"/pets/#{pet}")
       |> render(:show, pet: pet)
     end
   end

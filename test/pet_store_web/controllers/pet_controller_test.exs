@@ -21,17 +21,17 @@ defmodule PetStoreWeb.PetControllerTest do
 
   describe "index" do
     test "lists all pets", %{conn: conn} do
-      conn = get(conn, ~p"/api/pets")
+      conn = get(conn, ~p"/pets")
       assert json_response(conn, 200)["data"] == []
     end
   end
 
   describe "create pet" do
     test "renders pet when data is valid", %{conn: conn} do
-      conn = post(conn, ~p"/api/pets", pet: @create_attrs)
+      conn = post(conn, ~p"/pets", pet: @create_attrs)
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
-      conn = get(conn, ~p"/api/pets/#{id}")
+      conn = get(conn, ~p"/pets/#{id}")
 
       assert %{
                "id" => ^id,
@@ -41,7 +41,7 @@ defmodule PetStoreWeb.PetControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, ~p"/api/pets", pet: @invalid_attrs)
+      conn = post(conn, ~p"/pets", pet: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
@@ -50,10 +50,10 @@ defmodule PetStoreWeb.PetControllerTest do
     setup [:create_pet]
 
     test "renders pet when data is valid", %{conn: conn, pet: %Pet{id: id} = pet} do
-      conn = put(conn, ~p"/api/pets/#{pet}", pet: @update_attrs)
+      conn = put(conn, ~p"/pets/#{pet}", pet: @update_attrs)
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
 
-      conn = get(conn, ~p"/api/pets/#{id}")
+      conn = get(conn, ~p"/pets/#{id}")
 
       assert %{
                "id" => ^id,
@@ -63,7 +63,7 @@ defmodule PetStoreWeb.PetControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn, pet: pet} do
-      conn = put(conn, ~p"/api/pets/#{pet}", pet: @invalid_attrs)
+      conn = put(conn, ~p"/pets/#{pet}", pet: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
@@ -72,11 +72,11 @@ defmodule PetStoreWeb.PetControllerTest do
     setup [:create_pet]
 
     test "deletes chosen pet", %{conn: conn, pet: pet} do
-      conn = delete(conn, ~p"/api/pets/#{pet}")
+      conn = delete(conn, ~p"/pets/#{pet}")
       assert response(conn, 204)
 
       assert_error_sent 404, fn ->
-        get(conn, ~p"/api/pets/#{pet}")
+        get(conn, ~p"/pets/#{pet}")
       end
     end
   end
