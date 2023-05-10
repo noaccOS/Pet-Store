@@ -37,7 +37,7 @@ defmodule PetStoreWeb.PetController do
     pet = Animals.get_pet!(id)
 
     with {:ok, %Pet{}} <- Animals.delete_pet(pet) do
-      send_resp(conn, :no_content, "")
+      render(conn, :show, pet: pet)
     end
   end
 end
