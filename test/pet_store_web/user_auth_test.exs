@@ -11,7 +11,7 @@ defmodule PetStoreWeb.UserAuthTest do
       |> Map.replace!(:secret_key_base, PetStoreWeb.Endpoint.config(:secret_key_base))
       |> init_test_session(%{})
 
-    %{user: user_fixture(), conn: conn}
+    %{user: user_fixture(), admin: user_fixture(admin_level: 1), conn: conn}
   end
 
   describe "log_in_user/3" do
@@ -39,6 +39,26 @@ defmodule PetStoreWeb.UserAuthTest do
 
     test "does not halt if user is authenticated", %{conn: conn, user: user} do
       conn = conn |> log_in_user(user) |> UserAuth.require_authenticated_user([])
+      refute conn.halted
+      refute conn.status
+    end
+  end
+
+  describe "require_admin/2" do
+    test "halts if user is not authenticated", %{conn: conn} do
+      conn = conn |> fetch_flash() |> UserAuth.require_admin([])
+      assert conn.halted
+      assert conn.status == 401
+    end
+
+    test "halts if user is authenticated but is a normal user", %{conn: conn, user: user} do
+      conn = conn |> log_in_user(user) |> UserAuth.require_admin([])
+      assert conn.halted
+      assert conn.status == 403
+    end
+
+    test "does not halt if user is authenticated and an admin", %{conn: conn, admin: admin} do
+      conn = conn |> log_in_user(admin) |> UserAuth.require_admin([])
       refute conn.halted
       refute conn.status
     end

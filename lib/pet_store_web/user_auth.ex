@@ -51,6 +51,19 @@ defmodule PetStoreWeb.UserAuth do
     end
   end
 
+  def require_admin(conn, _opts) do
+    case try_authenticate(conn) do
+      {:ok, token, user} when user.admin_level > 0 ->
+        insert_auth(conn, token, user)
+
+      {:error, status} ->
+        raise_error(conn, status, "")
+
+      _ ->
+        raise_error(conn, :forbidden, "")
+    end
+  end
+
   defp raise_error(conn, status, body) do
     conn
     |> resp(status, body)
