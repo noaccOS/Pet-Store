@@ -16,7 +16,10 @@ defmodule PetStoreWeb.PetControllerTest do
   @invalid_attrs %{birthday: nil, name: nil}
 
   setup %{conn: conn} do
-    {:ok, conn: put_req_header(conn, "accept", "application/json")}
+    conn = put_req_header(conn, "accept", "application/json")
+    user = PetStore.AccountsFixtures.user_fixture()
+    admin = PetStore.AccountsFixtures.user_fixture(admin_level: 1)
+    %{conn: conn, user_conn: log_in_user(conn, user), admin_conn: log_in_user(conn, admin)}
   end
 
   describe "index" do
@@ -27,8 +30,8 @@ defmodule PetStoreWeb.PetControllerTest do
   end
 
   describe "create pet" do
-    test "renders pet when data is valid", %{conn: conn} do
-      conn = post(conn, ~p"/pets", pet: @create_attrs)
+    test "renders pet when data is valid", %{admin_conn: admin_conn} do
+      conn = post(admin_conn, ~p"/pets", pet: @create_attrs)
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
       conn = get(conn, ~p"/pets/#{id}")
@@ -40,8 +43,8 @@ defmodule PetStoreWeb.PetControllerTest do
              } = json_response(conn, 200)["data"]
     end
 
-    test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, ~p"/pets", pet: @invalid_attrs)
+    test "renders errors when data is invalid", %{admin_conn: admin_conn} do
+      conn = post(admin_conn, ~p"/pets", pet: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
@@ -49,8 +52,11 @@ defmodule PetStoreWeb.PetControllerTest do
   describe "update pet" do
     setup [:create_pet]
 
-    test "renders pet when data is valid", %{conn: conn, pet: %Pet{id: id} = pet} do
-      conn = put(conn, ~p"/pets/#{pet}", pet: @update_attrs)
+    test "renders pet when data is valid and user is admin", %{
+      admin_conn: admin_conn,
+      pet: %Pet{id: id} = pet
+    } do
+      conn = put(admin_conn, ~p"/pets/#{pet}", pet: @update_attrs)
       assert %{"id" => ^id} = json_response(conn, 200)["data"]
 
       conn = get(conn, ~p"/pets/#{id}")
@@ -62,8 +68,8 @@ defmodule PetStoreWeb.PetControllerTest do
              } = json_response(conn, 200)["data"]
     end
 
-    test "renders errors when data is invalid", %{conn: conn, pet: pet} do
-      conn = put(conn, ~p"/pets/#{pet}", pet: @invalid_attrs)
+    test "renders errors when data is invalid", %{admin_conn: admin_conn, pet: pet} do
+      conn = put(admin_conn, ~p"/pets/#{pet}", pet: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
@@ -71,12 +77,24 @@ defmodule PetStoreWeb.PetControllerTest do
   describe "delete pet" do
     setup [:create_pet]
 
-    test "deletes chosen pet", %{conn: conn, pet: pet} do
-      conn = delete(conn, ~p"/pets/#{pet}")
-      assert response(conn, 204)
+    test "can't delete pet as normal user/unauthenticated", %{
+      conn: conn,
+      user_conn: user_conn,
+      pet: pet
+    } do
+      unauthenticated = delete(conn, ~p"/pets/#{pet}")
+      assert %{status: 401, state: :sent} = unauthenticated
+
+      user_conn = delete(user_conn, ~p"/pets/#{pet}")
+      assert %{status: 403, state: :sent} = user_conn
+    end
+
+    test "deletes chosen pet", %{admin_conn: admin_conn, pet: pet} do
+      conn = delete(admin_conn, ~p"/pets/#{pet}")
+      assert json_response(conn, 200)
 
       assert_error_sent 404, fn ->
-        get(conn, ~p"/pets/#{pet}")
+        get(admin_conn, ~p"/pets/#{pet}")
       end
     end
   end
