@@ -3,7 +3,7 @@ defmodule PetStore.Repo.Migrations.AddAdminLevelToUsers do
 
   def up do
     alter table(:users) do
-      add_if_not_exists :admin_level, :integer, null: false, default: 0
+      add :admin_level, :integer, null: false, default: 0
     end
 
     create constraint(:users, :admin_level_range, check: "admin_level >= 0 AND admin_level <= 5")
@@ -13,7 +13,7 @@ defmodule PetStore.Repo.Migrations.AddAdminLevelToUsers do
     drop constraint(:users, :admin_level_range)
 
     alter table(:users) do
-      remove_if_exists :admin_level, :integer
+      remove :admin_level, :integer
     end
   end
 end
