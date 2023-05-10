@@ -5,7 +5,7 @@ defmodule PetStore.Animals.Pet do
   schema "pets" do
     field :birthday, :date
     field :name, :string
-    has_one :species, PetStore.Animals.Species
+    belongs_to :species, PetStore.Animals.Species, foreign_key: :species_name, references: :name
 
     timestamps()
   end
