@@ -4,7 +4,7 @@ defmodule PetStore.Animals.Species do
 
   schema "species" do
     field :family, :string
-    field :name, :string
+    field :name, :string, primary_key: true
 
     timestamps()
   end
