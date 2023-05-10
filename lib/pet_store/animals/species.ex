@@ -5,7 +5,6 @@ defmodule PetStore.Animals.Species do
   schema "species" do
     field :family, :string
     field :name, :string, primary_key: true
-    has_many :pet, PetStore.Animals.Pet, foreign_key: :species_name
 
     timestamps()
   end
