@@ -40,10 +40,7 @@ defmodule PetStoreWeb.UserAuth do
         insert_auth(conn, token, user)
 
       {:error, status} ->
-        conn
-        |> resp(status, "")
-        |> send_resp()
-        |> halt()
+        raise_error(conn, status, "")
     end
   end
 
@@ -52,6 +49,13 @@ defmodule PetStoreWeb.UserAuth do
       {:ok, token, user} -> insert_auth(conn, token, user)
       _ -> conn
     end
+  end
+
+  defp raise_error(conn, status, body) do
+    conn
+    |> resp(status, body)
+    |> send_resp()
+    |> halt()
   end
 
   defp insert_auth(conn, token, user) do
