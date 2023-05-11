@@ -17,7 +17,7 @@ defmodule PetStore.Animals.Pet do
   @doc false
   def changeset(pet, attrs) do
     pet
-    |> cast(attrs, [:name, :birthday])
-    |> validate_required([:name, :birthday])
+    |> cast(attrs, [:name, :birthday, :species])
+    |> validate_required([:name, :birthday, :species])
   end
 end
