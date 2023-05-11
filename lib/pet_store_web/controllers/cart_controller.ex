@@ -15,7 +15,6 @@ defmodule PetStoreWeb.CartController do
     with {:ok, %Cart{} = cart} <- Shop.create_cart(cart_params) do
       conn
       |> put_status(:created)
-      |> put_resp_header("location", ~p"/api/carts/#{cart}")
       |> render(:show, cart: cart)
     end
   end
