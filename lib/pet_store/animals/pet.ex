@@ -11,6 +11,8 @@ defmodule PetStore.Animals.Pet do
       references: :name,
       type: :string
 
+    belongs_to :cart, PetStore.Shop.Cart
+
     timestamps()
   end
 
