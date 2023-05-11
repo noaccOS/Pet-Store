@@ -2,9 +2,9 @@ defmodule PetStore.Animals.Species do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @primary_key {:name, :string, autogenerate: false}
   schema "species" do
     field :family, :string
-    field :name, :string, primary_key: true
 
     timestamps()
   end
