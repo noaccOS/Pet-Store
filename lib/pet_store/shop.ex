@@ -6,6 +6,7 @@ defmodule PetStore.Shop do
   import Ecto.Query, warn: false
   alias PetStore.Repo
 
+  alias PetStore.Accounts.User
   alias PetStore.Shop.Cart
 
   @doc """
@@ -100,5 +101,17 @@ defmodule PetStore.Shop do
   """
   def change_cart(%Cart{} = cart, attrs \\ %{}) do
     Cart.changeset(cart, attrs)
+  end
+
+  @doc """
+  Creates an empty cart for the given user.
+
+  ## Examples
+      iex> new_cart_for(%User{})
+      %Cart{}
+
+  """
+  def new_cart_for(%User{} = user) do
+    create_cart(%{user_id: user.id})
   end
 end
