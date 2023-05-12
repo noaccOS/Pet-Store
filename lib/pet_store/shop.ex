@@ -114,4 +114,25 @@ defmodule PetStore.Shop do
   def new_cart_for(%User{} = user) do
     create_cart(%{user_id: user.id})
   end
+
+  @doc """
+  Returns the current cart for the given user.
+
+  ## Examples
+
+      iex> open_cart_for(%User{})
+      %Cart{}
+  """
+  def open_cart_for(%User{} = user) do
+    query =
+      from c in Cart,
+        where:
+          c.user_id == ^user.id and
+            is_nil(c.completed_on)
+
+    case Repo.one(query) do
+      nil -> new_cart_for(user)
+      x -> x
+    end
+  end
 end
