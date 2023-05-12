@@ -56,5 +56,29 @@ defmodule PetStore.ShopTest do
       cart = cart_fixture()
       assert %Ecto.Changeset{} = Shop.change_cart(cart)
     end
+
+    test "add_to_cart/2 inserts an element in the cart" do
+      cart = cart_fixture()
+      pet = PetStore.AnimalsFixtures.pet_fixture()
+
+      cart = PetStore.Repo.preload(cart, :pets)
+      n1 = Enum.count(cart.pets)
+
+      Shop.add_to_cart(cart, pet)
+      cart = PetStore.Repo.preload(cart, :pets, force: true)
+      n2 = Enum.count(cart.pets)
+
+      assert n2 > n1
+      assert pet.id in Enum.map(cart.pets, fn p -> p.id end)
+    end
+
+    test "add_to_cart/2 doesn't add a pet present in another cart" do
+      cart1 = cart_fixture()
+      cart2 = cart_fixture()
+      pet = PetStore.AnimalsFixtures.pet_fixture()
+
+      assert {:ok, pet} = Shop.add_to_cart(cart1, pet)
+      assert {:error, _} = Shop.add_to_cart(cart2, pet)
+    end
   end
 end

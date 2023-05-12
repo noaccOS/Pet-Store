@@ -7,6 +7,7 @@ defmodule PetStore.Shop do
   alias PetStore.Repo
 
   alias PetStore.Accounts.User
+  alias PetStore.Animals.Pet
   alias PetStore.Shop.Cart
 
   @doc """
@@ -137,4 +138,27 @@ defmodule PetStore.Shop do
       x -> x
     end
   end
+
+  def add_to_cart(%Cart{} = cart, %Pet{} = pet) do
+    cart_id = cart.id
+
+    with :ok <- can_add_to_cart(cart_id, pet.cart_id) do
+      result =
+        pet
+        |> Ecto.Changeset.change(%{cart_id: cart_id})
+        |> PetStore.Repo.update!()
+
+      {:ok, result}
+    end
+  end
+
+  def add_to_cart(%User{} = user, %Pet{} = pet) do
+    user
+    |> open_cart_for
+    |> add_to_cart(pet)
+  end
+
+  defp can_add_to_cart(_, nil), do: :ok
+  defp can_add_to_cart(current_cart, current_cart), do: {:error, :already_in_cart}
+  defp can_add_to_cart(_, _), do: {:error, :forbidden}
 end
