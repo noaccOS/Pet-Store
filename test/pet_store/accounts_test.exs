@@ -38,6 +38,20 @@ defmodule PetStore.AccountsTest do
     end
   end
 
+  describe "fetch_user/1" do
+    test "returns the user with the given id" do
+      user = user_fixture()
+      assert {:ok, ^user} = Accounts.fetch_user(user.id)
+    end
+
+    test "returns an error with invalid id" do
+      user = user_fixture()
+      Repo.delete!(user)
+
+      assert {:error, :not_found} == Accounts.fetch_user(user.id)
+    end
+  end
+
   describe "fetch_user!/1" do
     test "raises if id is invalid" do
       assert_raise Ecto.NoResultsError, fn ->

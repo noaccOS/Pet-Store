@@ -52,6 +52,20 @@ defmodule PetStore.Accounts do
   @doc """
   Gets a single user.
 
+  ## Examples
+
+      iex> fetch_user(123)
+      {:ok, %User{}}
+
+      iex> fetch_user(456)
+      {:error, :not_found}
+
+  """
+  def fetch_user(id), do: Repo.fetch(User, id)
+
+  @doc """
+  Gets a single user.
+
   Raises `Ecto.NoResultsError` if the User does not exist.
 
   ## Examples
