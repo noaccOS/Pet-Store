@@ -7,7 +7,8 @@ defmodule PetStoreWeb.PetControllerTest do
 
   @create_attrs %{
     birthday: ~D[2023-05-08],
-    name: "some name"
+    name: "some name",
+    species_name: "cat"
   }
   @update_attrs %{
     birthday: ~D[2023-05-09],
@@ -31,6 +32,8 @@ defmodule PetStoreWeb.PetControllerTest do
 
   describe "create pet" do
     test "renders pet when data is valid", %{admin_conn: admin_conn} do
+      species_name = @create_attrs.species_name
+      PetStore.AnimalsFixtures.species_fixture(%{name: species_name})
       conn = post(admin_conn, ~p"/pets", pet: @create_attrs)
       assert %{"id" => id} = json_response(conn, 201)["data"]
 

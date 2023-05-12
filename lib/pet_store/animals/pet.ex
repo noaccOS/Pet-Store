@@ -17,8 +17,8 @@ defmodule PetStore.Animals.Pet do
   @doc false
   def changeset(pet, attrs) do
     pet
-    |> cast(attrs, [:name, :birthday, :species])
-    |> validate_required([:name, :birthday, :species])
+    |> cast(attrs, [:name, :birthday, :species_name])
+    |> validate_required([:name, :birthday, :species_name])
     |> foreign_key_constraint(:species)
   end
 end
