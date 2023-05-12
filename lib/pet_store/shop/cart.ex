@@ -15,7 +15,7 @@ defmodule PetStore.Shop.Cart do
   @doc false
   def changeset(cart, attrs) do
     cart
-    |> cast(attrs, [:completed_on])
-    |> validate_required([:completed_on])
+    |> cast(attrs, [:user_id, :completed_on])
+    |> validate_required([:user_id])
   end
 end
