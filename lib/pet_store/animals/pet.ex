@@ -19,5 +19,6 @@ defmodule PetStore.Animals.Pet do
     pet
     |> cast(attrs, [:name, :birthday, :species])
     |> validate_required([:name, :birthday, :species])
+    |> foreign_key_constraint(:species)
   end
 end
