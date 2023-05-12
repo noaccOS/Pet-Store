@@ -21,12 +21,12 @@ defmodule PetStoreWeb.PetController do
   end
 
   def show(conn, %{"id" => id}) do
-    pet = Animals.get_pet!(id)
+    pet = Animals.fetch_pet!(id)
     render(conn, :show, pet: pet)
   end
 
   def update(conn, %{"id" => id, "pet" => pet_params}) do
-    pet = Animals.get_pet!(id)
+    pet = Animals.fetch_pet!(id)
 
     with {:ok, %Pet{} = pet} <- Animals.update_pet(pet, pet_params) do
       render(conn, :show, pet: pet)
@@ -34,7 +34,7 @@ defmodule PetStoreWeb.PetController do
   end
 
   def delete(conn, %{"id" => id}) do
-    pet = Animals.get_pet!(id)
+    pet = Animals.fetch_pet!(id)
 
     with {:ok, %Pet{}} <- Animals.delete_pet(pet) do
       render(conn, :show, pet: pet)

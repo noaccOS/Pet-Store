@@ -15,9 +15,9 @@ defmodule PetStore.AnimalsTest do
       assert Animals.list_pets() == [pet]
     end
 
-    test "get_pet!/1 returns the pet with given id" do
+    test "fetch_pet!/1 returns the pet with given id" do
       pet = pet_fixture()
-      assert Animals.get_pet!(pet.id) == pet
+      assert Animals.fetch_pet!(pet.id) == pet
     end
 
     test "create_pet/1 with valid data creates a pet" do
@@ -48,13 +48,13 @@ defmodule PetStore.AnimalsTest do
     test "update_pet/2 with invalid data returns error changeset" do
       pet = pet_fixture()
       assert {:error, %Ecto.Changeset{}} = Animals.update_pet(pet, @invalid_attrs)
-      assert pet == Animals.get_pet!(pet.id)
+      assert pet == Animals.fetch_pet!(pet.id)
     end
 
     test "delete_pet/1 deletes the pet" do
       pet = pet_fixture()
       assert {:ok, %Pet{}} = Animals.delete_pet(pet)
-      assert_raise Ecto.NoResultsError, fn -> Animals.get_pet!(pet.id) end
+      assert_raise Ecto.NoResultsError, fn -> Animals.fetch_pet!(pet.id) end
     end
 
     test "change_pet/1 returns a pet changeset" do

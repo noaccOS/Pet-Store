@@ -28,14 +28,14 @@ defmodule PetStore.Animals do
 
   ## Examples
 
-      iex> get_pet!(123)
+      iex> fetch_pet!(123)
       %Pet{}
 
-      iex> get_pet!(456)
+      iex> fetch_pet!(456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_pet!(id), do: Repo.get!(Pet, id)
+  def fetch_pet!(id), do: Repo.fetch!(Pet, id)
 
   @doc """
   Creates a pet.
