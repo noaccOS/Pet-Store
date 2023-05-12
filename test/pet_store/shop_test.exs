@@ -8,7 +8,7 @@ defmodule PetStore.ShopTest do
 
     import PetStore.ShopFixtures
 
-    @invalid_attrs %{completed_on: nil}
+    @invalid_attrs %{user_id: nil}
 
     test "list_carts/0 returns all carts" do
       cart = cart_fixture()
@@ -21,10 +21,11 @@ defmodule PetStore.ShopTest do
     end
 
     test "create_cart/1 with valid data creates a cart" do
-      valid_attrs = %{completed_on: ~N[2023-05-10 09:04:00]}
+      valid_id = PetStore.AccountsFixtures.user_fixture().id
+      valid_attrs = %{user_id: valid_id}
 
       assert {:ok, %Cart{} = cart} = Shop.create_cart(valid_attrs)
-      assert cart.completed_on == ~N[2023-05-10 09:04:00]
+      assert cart.user_id == valid_id
     end
 
     test "create_cart/1 with invalid data returns error changeset" do
