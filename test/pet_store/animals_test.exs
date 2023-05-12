@@ -21,11 +21,15 @@ defmodule PetStore.AnimalsTest do
     end
 
     test "create_pet/1 with valid data creates a pet" do
-      valid_attrs = %{birthday: ~D[2023-05-08], name: "some name"}
+      species_name = "some_species"
+      valid_attrs = %{birthday: ~D[2023-05-08], name: "some name", species_name: species_name}
+
+      species_fixture(%{name: species_name})
 
       assert {:ok, %Pet{} = pet} = Animals.create_pet(valid_attrs)
       assert pet.birthday == ~D[2023-05-08]
       assert pet.name == "some name"
+      assert pet.species_name == species_name
     end
 
     test "create_pet/1 with invalid data returns error changeset" do
