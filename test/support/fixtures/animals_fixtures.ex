@@ -18,4 +18,20 @@ defmodule PetStore.AnimalsFixtures do
 
     pet
   end
+
+  @doc """
+  Generate a species.
+  """
+  def species_fixture(attrs \\ %{}) do
+    attrs =
+      attrs
+      |> Enum.into(%{
+        name: "cat",
+        family: "feline"
+      })
+
+    %PetStore.Animals.Species{}
+    |> Ecto.Changeset.change(attrs)
+    |> PetStore.Repo.insert!()
+  end
 end
