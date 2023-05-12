@@ -25,11 +25,7 @@ defmodule PetStore.Accounts do
 
   """
   def fetch_user_by_email(email) when is_binary(email) do
-    with %User{} = user <- Repo.get_by(User, email: email) do
-      {:ok, user}
-    else
-      _ -> {:error, :not_found}
-    end
+    Repo.fetch_by(User, email: email)
   end
 
   @doc """
@@ -67,7 +63,7 @@ defmodule PetStore.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def fetch_user!(id), do: Repo.get!(User, id)
+  def fetch_user!(id), do: Repo.fetch!(User, id)
 
   ## User registration
 
