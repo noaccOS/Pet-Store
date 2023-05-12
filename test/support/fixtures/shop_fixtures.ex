@@ -8,10 +8,14 @@ defmodule PetStore.ShopFixtures do
   Generate a cart.
   """
   def cart_fixture(attrs \\ %{}) do
+    user_id =
+      attrs[:user_id] ||
+        PetStore.AccountsFixtures.user_fixture().id
+
     {:ok, cart} =
       attrs
       |> Enum.into(%{
-        completed_on: ~N[2023-05-10 09:04:00]
+        user_id: user_id
       })
       |> PetStore.Shop.create_cart()
 
