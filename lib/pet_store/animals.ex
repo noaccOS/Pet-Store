@@ -24,6 +24,20 @@ defmodule PetStore.Animals do
   @doc """
   Gets a single pet.
 
+  ## Examples
+
+      iex> fetch_pet(123)
+      {:ok, %Pet{}}
+
+      iex> fetch_pet(456)
+      {:error, :not_found}
+
+  """
+  def fetch_pet(id), do: Repo.fetch(Pet, id)
+
+  @doc """
+  Gets a single pet.
+
   Raises `Ecto.NoResultsError` if the Pet does not exist.
 
   ## Examples

@@ -15,6 +15,14 @@ defmodule PetStore.AnimalsTest do
       assert Animals.list_pets() == [pet]
     end
 
+    test "fetch_pet/1" do
+      pet = pet_fixture()
+      assert {:ok, ^pet} = Animals.fetch_pet(pet.id)
+
+      Animals.delete_pet(pet)
+      assert {:error, :not_found} == Animals.fetch_pet(pet.id)
+    end
+
     test "fetch_pet!/1 returns the pet with given id" do
       pet = pet_fixture()
       assert Animals.fetch_pet!(pet.id) == pet
