@@ -112,7 +112,9 @@ defmodule PetStore.Shop do
 
   """
   def new_cart_for(%User{} = user) do
-    create_cart(%{user_id: user.id})
+    %Cart{user_id: user.id}
+    |> Ecto.Changeset.change()
+    |> Repo.insert!()
   end
 
   @doc """
