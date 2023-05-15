@@ -117,11 +117,15 @@ defmodule PetStore.Accounts do
   """
   def try_register_user(attrs, creator \\ nil) do
     max_admin_level = get_in(creator, [Access.key!(:admin_level)]) || 0
+    new_user_admin_level = attrs[:admin_level] || 0
 
-    %User{}
-    |> User.registration_changeset(attrs, max_admin_level: max_admin_level)
-    |> maybe_confirm_user(creator)
-    |> Repo.insert()
+    if new_user_admin_level > max_admin_level,
+      do: {:error, :forbidden},
+      else:
+        %User{}
+        |> User.registration_changeset(attrs)
+        |> maybe_confirm_user(creator)
+        |> Repo.insert()
   end
 
   defp maybe_confirm_user(changeset, creator) do

@@ -13,14 +13,6 @@ defmodule PetStoreWeb.UserRegistrationController do
       }) do
     with {:ok, new_user} <- Accounts.try_register_user(user_params, creator) do
       render(conn, :data, data: new_user)
-    else
-      {:error, %{"errors" => %{"admin_level" => admin}} = changeset} ->
-        if "insufficient permissions" in admin,
-          do: {:error, :forbidden},
-          else: {:error, changeset}
-
-      other ->
-        other
     end
   end
 

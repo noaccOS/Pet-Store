@@ -65,10 +65,6 @@ defmodule PetStore.Accounts.User do
   defp validate_admin_level(changeset, opts) do
     changeset
     |> validate_inclusion(:admin_level, 0..5, message: "invalid range")
-    |> validate_number(:admin_level,
-      less_than_or_equal_to: Keyword.get(opts, :max_admin_level, 5),
-      message: "insufficient permissions"
-    )
   end
 
   defp maybe_hash_password(changeset, opts) do
