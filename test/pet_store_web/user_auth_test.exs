@@ -63,4 +63,48 @@ defmodule PetStoreWeb.UserAuthTest do
       refute conn.status
     end
   end
+
+  describe "same_user_or_higher_admin/2" do
+    test "works if same user", %{conn: conn, user: user, admin: admin} do
+      conn_user =
+        conn
+        |> log_in_user(user)
+        |> put_req_query_param("id", user.id)
+        |> UserAuth.same_user_or_higher_admin([])
+
+      refute conn_user.halted
+      refute conn_user.status
+
+      conn_admin =
+        conn
+        |> log_in_user(admin)
+        |> put_req_query_param("id", admin.id)
+        |> UserAuth.same_user_or_higher_admin([])
+
+      refute conn_admin.halted
+      refute conn_admin.status
+    end
+
+    test "works if higher admin", %{conn: conn, user: user, admin: admin} do
+      conn =
+        conn
+        |> log_in_user(admin)
+        |> put_req_query_param("id", user.id)
+        |> UserAuth.same_user_or_higher_admin([])
+
+      refute conn.halted
+      refute conn.status
+    end
+
+    test "halts if lower admin", %{conn: conn, user: user, admin: admin} do
+      conn =
+        conn
+        |> log_in_user(user)
+        |> put_req_query_param("id", admin.id)
+        |> UserAuth.same_user_or_higher_admin([])
+
+      assert conn.halted
+      assert conn.status == 403
+    end
+  end
 end

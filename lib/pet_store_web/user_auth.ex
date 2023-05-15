@@ -64,6 +64,27 @@ defmodule PetStoreWeb.UserAuth do
     end
   end
 
+  def same_user_or_higher_admin(conn, _opts) do
+    caller_id = get_in(conn.assigns, [:current_user, Access.key!(:id)])
+    conn = Plug.Conn.fetch_query_params(conn)
+    requested_id = get_in(conn.query_params, [Access.key!("id")])
+
+    if caller_id &&
+         (same_user(caller_id, requested_id) or
+            higher_admin(conn.assigns.current_user.admin_level, requested_id)),
+       do: conn,
+       else: raise_error(conn, :forbidden)
+  end
+
+  defp same_user(x, y), do: x == y
+
+  defp higher_admin(caller_level, requested_id) do
+    case Accounts.fetch_user(requested_id) do
+      {:ok, user} -> caller_level > user.admin_level
+      _ -> false
+    end
+  end
+
   defp raise_error(conn, status, body \\ "") do
     conn
     |> resp(status, body)
