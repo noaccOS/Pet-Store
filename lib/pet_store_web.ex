@@ -57,6 +57,44 @@ defmodule PetStoreWeb do
     end
   end
 
+  def json do
+    quote do
+      def message_info(%{msg: message}) do
+        %{
+          "status" => "info",
+          "message" => message
+        }
+      end
+
+      def message_ok(%{msg: message}) do
+        %{
+          "status" => "ok",
+          "message" => message
+        }
+      end
+
+      def data(%{data: data}) do
+        %{
+          "data" => to_data(data)
+        }
+      end
+
+      def message_error(%{msg: message}) do
+        %{
+          "status" => "error",
+          "message" => message
+        }
+      end
+
+      defp to_data(%PetStore.Accounts.User{} = user) do
+        %{
+          id: user.id,
+          email: user.email
+        }
+      end
+    end
+  end
+
   @doc """
   When used, dispatch to the appropriate controller/view/etc.
   """
