@@ -63,4 +63,13 @@ defmodule PetStoreWeb.ConnCase do
     |> Plug.Conn.assign(:user_token, token)
     |> Plug.Conn.assign(:current_user, user)
   end
+
+  @doc """
+  Sets a value in the query parameters.
+  """
+  def put_req_query_param(conn, key, value) do
+    conn
+    |> Plug.Conn.fetch_query_params()
+    |> put_in([Access.key(:query_params), key], value)
+  end
 end
