@@ -43,6 +43,9 @@ defmodule PetStoreWeb.Router do
     patch "/pets/:id", PetController, :update
     put "/pets/:id", PetController, :update
     delete "/pets/:id", PetController, :delete
+
+    get "/carts", CartController, :index
+    get "/carts/:id", CartController, :show
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
