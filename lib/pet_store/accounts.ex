@@ -183,6 +183,16 @@ defmodule PetStore.Accounts do
   end
 
   @doc """
+  Version without password check
+  Used when changing the password for another user.
+  """
+  def apply_user_email(user, email) do
+    user
+    |> User.email_changeset(%{email: email})
+    |> Ecto.Changeset.apply_action(:update)
+  end
+
+  @doc """
   Updates the user email using the given token.
 
   If the token matches, the user email is updated and the token is deleted.

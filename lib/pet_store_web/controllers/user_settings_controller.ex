@@ -12,8 +12,7 @@ defmodule PetStoreWeb.UserSettingsController do
   def update(conn, %{"action" => "update_email", "target" => target_email, "value" => new_email}) do
     with {:ok, target} <-
            Accounts.maybe_redacted_user_by_email(target_email, conn.assigns.current_user),
-         email_changeset = Accounts.change_user_email(target, %{email: new_email}),
-         {:ok, new_user} <- Ecto.Changeset.apply_action(email_changeset, :update) do
+         {:ok, new_user} <- Accounts.apply_user_email(target, new_email) do
       token = Accounts.generate_user_token(target)
 
       Accounts.deliver_user_update_email_instructions(
