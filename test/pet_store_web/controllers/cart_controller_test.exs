@@ -5,75 +5,50 @@ defmodule PetStoreWeb.CartControllerTest do
 
   alias PetStore.Shop.Cart
 
-  @create_attrs %{
-    completed_on: ~N[2023-05-10 09:04:00]
-  }
-  @update_attrs %{
-    completed_on: ~N[2023-05-11 09:04:00]
-  }
-  @invalid_attrs %{completed_on: nil}
-
   setup %{conn: conn} do
-    {:ok, conn: put_req_header(conn, "accept", "application/json")}
+    conn = put_req_header(conn, "accept", "application/json")
+    user = PetStore.AccountsFixtures.user_fixture()
+    admin = PetStore.AccountsFixtures.user_fixture(admin_level: 1)
+    %{conn: conn, user_conn: log_in_user(conn, user), admin_conn: log_in_user(conn, admin)}
   end
 
   describe "index" do
-    test "lists all carts", %{conn: conn} do
-      conn = get(conn, ~p"/api/carts")
-      assert json_response(conn, 200)["data"] == []
+    test "lists all carts if admin account", %{admin_conn: conn} do
+      conn = get(conn, ~p"/carts")
+      assert json_response(conn, 200)["data"]
+    end
+
+    test "errors out with normal user", %{user_conn: conn} do
+      conn
+      |> get(~p"/carts")
+      |> response(403)
+    end
+
+    test "errors out when unauthenticated", %{conn: conn} do
+      conn
+      |> get(~p"/carts")
+      |> response(401)
     end
   end
 
-  describe "create cart" do
-    test "renders cart when data is valid", %{conn: conn} do
-      conn = post(conn, ~p"/api/carts", cart: @create_attrs)
-      assert %{"id" => id} = json_response(conn, 201)["data"]
-
-      conn = get(conn, ~p"/api/carts/#{id}")
-
-      assert %{
-               "id" => ^id,
-               "completed_on" => "2023-05-10T09:04:00"
-             } = json_response(conn, 200)["data"]
-    end
-
-    test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, ~p"/api/carts", cart: @invalid_attrs)
-      assert json_response(conn, 422)["errors"] != %{}
-    end
-  end
-
-  describe "update cart" do
+  describe "show" do
     setup [:create_cart]
 
-    test "renders cart when data is valid", %{conn: conn, cart: %Cart{id: id} = cart} do
-      conn = put(conn, ~p"/api/carts/#{cart}", cart: @update_attrs)
-      assert %{"id" => ^id} = json_response(conn, 200)["data"]
-
-      conn = get(conn, ~p"/api/carts/#{id}")
-
-      assert %{
-               "id" => ^id,
-               "completed_on" => "2023-05-11T09:04:00"
-             } = json_response(conn, 200)["data"]
+    test "shows the cart if admin", %{admin_conn: conn, cart: cart} do
+      conn = get(conn, ~p"/carts/#{cart}")
+      assert json_response(conn, 200)["data"]
     end
 
-    test "renders errors when data is invalid", %{conn: conn, cart: cart} do
-      conn = put(conn, ~p"/api/carts/#{cart}", cart: @invalid_attrs)
-      assert json_response(conn, 422)["errors"] != %{}
+    test "errors out with normal user", %{user_conn: conn, cart: cart} do
+      conn
+      |> get(~p"/carts/#{cart}")
+      |> response(403)
     end
-  end
 
-  describe "delete cart" do
-    setup [:create_cart]
-
-    test "deletes chosen cart", %{conn: conn, cart: cart} do
-      conn = delete(conn, ~p"/api/carts/#{cart}")
-      assert response(conn, 204)
-
-      assert_error_sent 404, fn ->
-        get(conn, ~p"/api/carts/#{cart}")
-      end
+    test "errors out when unauthenticated", %{conn: conn, cart: cart} do
+      conn
+      |> get(~p"/carts/#{cart}")
+      |> response(401)
     end
   end
 
