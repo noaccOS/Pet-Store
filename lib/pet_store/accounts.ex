@@ -103,19 +103,8 @@ defmodule PetStore.Accounts do
 
       iex> register_user(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
-
   """
-  def register_user(attrs) do
-    %User{}
-    |> User.registration_changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Like register user, but should be preferred when registering from the web interface as
-  it checks for adequate admin_level
-  """
-  def try_register_user(attrs, creator \\ nil) do
+  def register_user(attrs, creator \\ nil) do
     max_admin_level = get_in(creator, [Access.key!(:admin_level)]) || 0
     new_user_admin_level = attrs[:admin_level] || 0
 

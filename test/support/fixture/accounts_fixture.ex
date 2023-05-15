@@ -16,10 +16,12 @@ defmodule PetStore.AccountsFixtures do
   end
 
   def user_fixture(attrs \\ %{}) do
+    valid_attrs = valid_user_attributes(attrs)
+
     {:ok, user} =
-      attrs
-      |> valid_user_attributes()
-      |> PetStore.Accounts.register_user()
+      %PetStore.Accounts.User{}
+      |> PetStore.Accounts.User.registration_changeset(valid_attrs)
+      |> PetStore.Repo.insert()
 
     user
   end

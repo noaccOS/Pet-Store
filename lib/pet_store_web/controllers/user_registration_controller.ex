@@ -11,13 +11,13 @@ defmodule PetStoreWeb.UserRegistrationController do
   def create(%Plug.Conn{assigns: %{current_user: %PetStore.Accounts.User{} = creator}} = conn, %{
         "user" => user_params
       }) do
-    with {:ok, new_user} <- Accounts.try_register_user(user_params, creator) do
+    with {:ok, new_user} <- Accounts.register_user(user_params, creator) do
       render(conn, :data, data: new_user)
     end
   end
 
   def create(conn, %{"user" => user_params}) do
-    with {:ok, user} <- Accounts.try_register_user(user_params) do
+    with {:ok, user} <- Accounts.register_user(user_params) do
       {:ok, _} =
         Accounts.deliver_user_confirmation_instructions(
           user,

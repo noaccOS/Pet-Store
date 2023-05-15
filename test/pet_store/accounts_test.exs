@@ -86,7 +86,7 @@ defmodule PetStore.AccountsTest do
     end
   end
 
-  describe "register_user/1" do
+  describe "register_user/2" do
     test "requires email and password to be set" do
       {:error, changeset} = Accounts.register_user(%{})
 
@@ -130,59 +130,12 @@ defmodule PetStore.AccountsTest do
       assert is_nil(user.confirmed_at)
       assert is_nil(user.password)
     end
-  end
-
-  describe "try_register_user/2" do
-    test "requires email and password to be set" do
-      {:error, changeset} = Accounts.try_register_user(%{})
-
-      assert %{
-               password: ["can't be blank"],
-               email: ["can't be blank"]
-             } = errors_on(changeset)
-    end
-
-    test "validates email and password when given" do
-      {:error, changeset} =
-        Accounts.try_register_user(%{email: "not valid", password: "not valid"})
-
-      assert %{
-               email: ["must have the @ sign and no spaces"],
-               password: ["should be at least 12 character(s)"]
-             } = errors_on(changeset)
-    end
-
-    test "validates maximum values for email and password for security" do
-      too_long = String.duplicate("db", 100)
-      {:error, changeset} = Accounts.try_register_user(%{email: too_long, password: too_long})
-      assert "should be at most 160 character(s)" in errors_on(changeset).email
-      assert "should be at most 72 character(s)" in errors_on(changeset).password
-    end
-
-    test "validates email uniqueness" do
-      %{email: email} = user_fixture()
-      {:error, changeset} = Accounts.try_register_user(%{email: email})
-      assert "has already been taken" in errors_on(changeset).email
-
-      # Now try with the upper cased email too, to check that email case is ignored.
-      {:error, changeset} = Accounts.try_register_user(%{email: String.upcase(email)})
-      assert "has already been taken" in errors_on(changeset).email
-    end
-
-    test "registers users with a hashed password" do
-      email = unique_user_email()
-      {:ok, user} = Accounts.try_register_user(valid_user_attributes(email: email))
-      assert user.email == email
-      assert is_binary(user.hashed_password)
-      assert is_nil(user.confirmed_at)
-      assert is_nil(user.password)
-    end
 
     test "can register admin user" do
       admin_level = 2
       creator = %User{admin_level: admin_level}
       user_attrs = valid_user_attributes(admin_level: admin_level)
-      {:ok, user} = Accounts.try_register_user(user_attrs, creator)
+      {:ok, user} = Accounts.register_user(user_attrs, creator)
       assert user.admin_level == admin_level
       assert user.confirmed_at
     end
@@ -193,14 +146,14 @@ defmodule PetStore.AccountsTest do
 
       creator = %User{admin_level: creator_level}
       user_attrs = valid_user_attributes(admin_level: new_level)
-      assert {:error, :forbidden} == Accounts.try_register_user(user_attrs, creator)
+      assert {:error, :forbidden} == Accounts.register_user(user_attrs, creator)
     end
 
     test "normal user doesn't confirm newly created user" do
       creator = %User{admin_level: 0}
 
       user_attrs = valid_user_attributes()
-      {:ok, user} = Accounts.try_register_user(user_attrs, creator)
+      {:ok, user} = Accounts.register_user(user_attrs, creator)
       refute user.confirmed_at
     end
   end
