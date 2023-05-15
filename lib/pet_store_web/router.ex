@@ -48,6 +48,12 @@ defmodule PetStoreWeb.Router do
     get "/carts/:id", CartController, :show
   end
 
+  scope "/", PetStoreWeb do
+    pipe_through [:api, :same_user_or_higher_admin]
+
+    get "/users/:id/cart", CartController, :show_open
+  end
+
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:pet_store, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put
