@@ -94,8 +94,8 @@ defmodule PetStoreWeb.UserSettingsControllerTest do
     end
 
     test "does not update user email without enough permissions", %{conn: conn, user: user} do
-      admin = PetStore.AccountsFixtures.user_fixture(admin_level: 0)
-      conn = log_in_user(conn, admin)
+      normal_user = PetStore.AccountsFixtures.user_fixture(admin_level: 0)
+      conn = log_in_user(conn, normal_user)
 
       conn =
         put(conn, ~p"/users/settings", %{
