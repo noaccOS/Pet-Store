@@ -2,8 +2,6 @@ defmodule PetStoreWeb.CartController do
   use PetStoreWeb, :controller
 
   alias PetStore.Shop
-  alias PetStore.Shop.Cart
-  alias PetStore.Animals
   alias PetStore.Accounts
 
   action_fallback PetStoreWeb.FallbackController

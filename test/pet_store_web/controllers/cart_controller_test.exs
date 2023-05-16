@@ -3,8 +3,6 @@ defmodule PetStoreWeb.CartControllerTest do
 
   import PetStore.ShopFixtures
 
-  alias PetStore.Shop.Cart
-
   setup %{conn: conn} do
     conn = put_req_header(conn, "accept", "application/json")
     user = PetStore.AccountsFixtures.user_fixture()
