@@ -1,5 +1,6 @@
 defmodule PetStoreWeb.CartJSON do
   alias PetStore.Shop.Cart
+  alias PetStoreWeb.PetJSON
 
   @doc """
   Renders a list of carts.
@@ -21,7 +22,7 @@ defmodule PetStoreWeb.CartJSON do
     %{
       id: cart.id,
       completed_on: cart.completed_on,
-      pets: cart.pets
+      pets: Enum.map(cart.pets, &PetJSON.data/1)
     }
   end
 end
