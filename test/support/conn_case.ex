@@ -65,11 +65,9 @@ defmodule PetStoreWeb.ConnCase do
   end
 
   @doc """
-  Sets a value in the query parameters.
+  Sets a value in the path parameters.
   """
-  def put_req_query_param(conn, key, value) do
-    conn
-    |> Plug.Conn.fetch_query_params()
-    |> put_in([Access.key(:query_params), key], value)
+  def put_req_path_param(conn, key, value) do
+    put_in(conn.path_params[key], value)
   end
 end

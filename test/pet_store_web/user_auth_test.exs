@@ -69,7 +69,7 @@ defmodule PetStoreWeb.UserAuthTest do
       conn_user =
         conn
         |> log_in_user(user)
-        |> put_req_query_param("id", user.id)
+        |> put_req_path_param("id", to_string(user.id))
         |> UserAuth.same_user_or_higher_admin([])
 
       refute conn_user.halted
@@ -78,7 +78,7 @@ defmodule PetStoreWeb.UserAuthTest do
       conn_admin =
         conn
         |> log_in_user(admin)
-        |> put_req_query_param("id", admin.id)
+        |> put_req_path_param("id", to_string(admin.id))
         |> UserAuth.same_user_or_higher_admin([])
 
       refute conn_admin.halted
@@ -89,7 +89,7 @@ defmodule PetStoreWeb.UserAuthTest do
       conn =
         conn
         |> log_in_user(admin)
-        |> put_req_query_param("id", user.id)
+        |> put_req_path_param("id", to_string(user.id))
         |> UserAuth.same_user_or_higher_admin([])
 
       refute conn.halted
@@ -100,7 +100,7 @@ defmodule PetStoreWeb.UserAuthTest do
       conn =
         conn
         |> log_in_user(user)
-        |> put_req_query_param("id", admin.id)
+        |> put_req_path_param("id", to_string(admin.id))
         |> UserAuth.same_user_or_higher_admin([])
 
       assert conn.halted
