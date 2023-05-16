@@ -15,7 +15,7 @@ defmodule PetStoreWeb.PetJSON do
     %{data: data(pet)}
   end
 
-  defp data(%Pet{} = pet) do
+  def data(%Pet{} = pet) do
     %{
       id: pet.id,
       name: pet.name,

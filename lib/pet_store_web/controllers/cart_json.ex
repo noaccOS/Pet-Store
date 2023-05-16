@@ -15,7 +15,7 @@ defmodule PetStoreWeb.CartJSON do
     %{data: data(cart)}
   end
 
-  defp data(%Cart{} = cart) do
+  def data(%Cart{} = cart) do
     cart = cart |> PetStore.Repo.preload(:pets)
 
     %{
