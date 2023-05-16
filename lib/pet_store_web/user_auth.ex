@@ -75,7 +75,7 @@ defmodule PetStoreWeb.UserAuth do
         {id, ""} -> id
       end
 
-    if caller_id &&
+    if caller_id && requested_id &&
          (same_user(caller_id, requested_id) or
             higher_admin(conn.assigns.current_user.admin_level, requested_id)),
        do: conn,
