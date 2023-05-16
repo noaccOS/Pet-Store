@@ -4,6 +4,7 @@ defmodule PetStoreWeb.CartController do
   alias PetStore.Shop
   alias PetStore.Shop.Cart
   alias PetStore.Animals
+  alias PetStore.Accounts
 
   action_fallback PetStoreWeb.FallbackController
 
@@ -18,7 +19,8 @@ defmodule PetStoreWeb.CartController do
   end
 
   def show_open(conn, %{"id" => user_id}) do
-    cart = Shop.open_cart_for(user_id)
+    user = Accounts.fetch_user!(user_id)
+    cart = Shop.open_cart_for(user)
     render(conn, :show, cart: cart)
   end
 end
