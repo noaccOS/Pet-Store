@@ -64,6 +64,10 @@ defmodule PetStoreWeb.UserAuth do
     end
   end
 
+  @doc """
+  Plug which only allows connections where the requested user is the same as the logged in user
+  or the logged in user has higher admin rights
+  """
   def same_user_or_higher_admin(conn, _opts) do
     caller_id = get_in(conn.assigns, [:current_user, Access.key!(:id)])
 
