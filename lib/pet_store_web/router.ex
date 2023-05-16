@@ -49,7 +49,7 @@ defmodule PetStoreWeb.Router do
   end
 
   scope "/", PetStoreWeb do
-    pipe_through [:api, :same_user_or_higher_admin]
+    pipe_through [:api, :require_authenticated_user, :same_user_or_higher_admin]
 
     get "/users/:id/cart", CartController, :show_open
   end
