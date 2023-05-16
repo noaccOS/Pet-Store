@@ -2,6 +2,7 @@ defmodule PetStoreWeb.CartController do
   use PetStoreWeb, :controller
 
   alias PetStore.Shop
+  alias PetStore.Animals
   alias PetStore.Accounts
 
   action_fallback PetStoreWeb.FallbackController
@@ -20,5 +21,15 @@ defmodule PetStoreWeb.CartController do
     user = Accounts.fetch_user!(user_id)
     cart = Shop.open_cart_for(user)
     render(conn, :show, cart: cart)
+  end
+
+  def add_to_cart(conn, %{"id" => pet_id}) do
+    user = conn.assigns.current_user
+    cart = Shop.open_cart_for(user)
+
+    with {:ok, pet} <- Animals.fetch_pet(pet_id),
+         {:ok, _new_pet} <- Shop.add_to_cart(cart, pet) do
+      render(conn, :show, cart: cart)
+    end
   end
 end

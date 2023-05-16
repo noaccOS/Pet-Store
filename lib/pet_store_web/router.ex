@@ -20,6 +20,8 @@ defmodule PetStoreWeb.Router do
     get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
 
     delete "/users/log_out", UserSessionController, :delete
+
+    patch "/pets/:id/add", CartController, :add_to_cart
   end
 
   scope "/", PetStoreWeb do
