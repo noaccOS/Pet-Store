@@ -75,7 +75,7 @@ defmodule PetStoreWeb.CartControllerTest do
     test "errors out when unauthenticated", %{conn: conn, user: user} do
       conn
       |> get(~p"/users/#{user}/cart")
-      |> response(401)
+      |> response(403)
     end
   end
 
