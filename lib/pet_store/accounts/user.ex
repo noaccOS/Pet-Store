@@ -62,7 +62,7 @@ defmodule PetStore.Accounts.User do
     |> maybe_hash_password(opts)
   end
 
-  defp validate_admin_level(changeset, opts) do
+  defp validate_admin_level(changeset, _opts) do
     changeset
     |> validate_inclusion(:admin_level, 0..5, message: "invalid range")
   end
