@@ -8,6 +8,12 @@ defmodule PetStoreWeb.Router do
   end
 
   scope "/", PetStoreWeb do
+    pipe_through [:api, :maybe_authenticate_user]
+
+    post "/users/register", UserRegistrationController, :create
+  end
+
+  scope "/", PetStoreWeb do
     pipe_through [:api, :require_authenticated_user]
 
     put "/users/settings", UserSettingsController, :update
@@ -22,7 +28,6 @@ defmodule PetStoreWeb.Router do
     post "/users/confirm", UserConfirmationController, :create
     post "/users/confirm/:token", UserConfirmationController, :update
 
-    post "/users/register", UserRegistrationController, :create
     post "/users/log_in", UserSessionController, :create
     post "/users/reset_password", UserResetPasswordController, :create
     put "/users/reset_password/:token", UserResetPasswordController, :update

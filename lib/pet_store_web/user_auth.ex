@@ -37,9 +37,7 @@ defmodule PetStoreWeb.UserAuth do
   def require_authenticated_user(conn, _opts) do
     case try_authenticate(conn) do
       {:ok, token, user} ->
-        conn
-        |> assign(:current_user, user)
-        |> assign(:user_token, token)
+        insert_auth(conn, token, user)
 
       {:error, status} ->
         conn
@@ -47,6 +45,19 @@ defmodule PetStoreWeb.UserAuth do
         |> send_resp()
         |> halt()
     end
+  end
+
+  def maybe_authenticate_user(conn, _opts) do
+    case try_authenticate(conn) do
+      {:ok, token, user} -> insert_auth(conn, token, user)
+      _ -> conn
+    end
+  end
+
+  defp insert_auth(conn, token, user) do
+    conn
+    |> assign(:current_user, user)
+    |> assign(:user_token, token)
   end
 
   defp try_authenticate(conn) do

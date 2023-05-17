@@ -75,6 +75,37 @@ defmodule PetStoreWeb.UserSettingsControllerTest do
       assert "is not valid" in errors["current_password"]
       assert "must have the @ sign and no spaces" in errors["email"]
     end
+
+    test "updates another user's email if lower admin level", %{conn: conn, user: user} do
+      admin = PetStore.AccountsFixtures.user_fixture(admin_level: 2)
+      conn = log_in_user(conn, admin)
+
+      conn =
+        put(conn, ~p"/users/settings", %{
+          "action" => "update_email",
+          "target" => user.email,
+          "value" => unique_user_email()
+        })
+
+      assert json_response(conn, 200)["message"] =~
+               "A link to confirm your email"
+
+      assert {:ok, _} = Accounts.fetch_user_by_email(user.email)
+    end
+
+    test "does not update user email without enough permissions", %{conn: conn, user: user} do
+      normal_user = PetStore.AccountsFixtures.user_fixture(admin_level: 0)
+      conn = log_in_user(conn, normal_user)
+
+      conn =
+        put(conn, ~p"/users/settings", %{
+          "action" => "update_email",
+          "target" => user.email,
+          "value" => unique_user_email()
+        })
+
+      assert json_response(conn, 403)
+    end
   end
 
   describe "GET /users/settings/confirm_email/:token" do

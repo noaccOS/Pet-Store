@@ -28,6 +28,16 @@ defmodule PetStore.Accounts do
     Repo.fetch_by(User, email: email)
   end
 
+  def maybe_redacted_user_by_email(email, caller) when is_binary(email) do
+    case fetch_user_by_email(email) do
+      {:ok, %User{admin_level: admin_level} = user} when admin_level < caller.admin_level ->
+        {:ok, user}
+
+      _ ->
+        {:error, :forbidden}
+    end
+  end
+
   @doc """
   Gets a user by email and password.
 
@@ -83,6 +93,8 @@ defmodule PetStore.Accounts do
 
   @doc """
   Registers a user.
+  If the registration is done by an admin account, the new user may have an admin level <= the value
+  of the account creating it.
 
   ## Examples
 
@@ -91,12 +103,24 @@ defmodule PetStore.Accounts do
 
       iex> register_user(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
-
   """
-  def register_user(attrs) do
-    %User{}
-    |> User.registration_changeset(attrs)
-    |> Repo.insert()
+  def register_user(attrs, creator \\ nil) do
+    max_admin_level = get_in(creator, [Access.key!(:admin_level)]) || 0
+    new_user_admin_level = attrs[:admin_level] || 0
+
+    if new_user_admin_level > max_admin_level,
+      do: {:error, :forbidden},
+      else:
+        %User{}
+        |> User.registration_changeset(attrs)
+        |> maybe_confirm_user(creator)
+        |> Repo.insert()
+  end
+
+  defp maybe_confirm_user(changeset, creator) do
+    if creator && creator.admin_level > 0,
+      do: User.confirm_changeset(changeset),
+      else: changeset
   end
 
   @doc """
@@ -144,6 +168,16 @@ defmodule PetStore.Accounts do
     user
     |> User.email_changeset(attrs)
     |> User.validate_current_password(password)
+    |> Ecto.Changeset.apply_action(:update)
+  end
+
+  @doc """
+  Version without password check
+  Used when changing the password for another user.
+  """
+  def apply_user_email(user, email) do
+    user
+    |> User.email_changeset(%{email: email})
     |> Ecto.Changeset.apply_action(:update)
   end
 

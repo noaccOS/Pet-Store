@@ -89,7 +89,8 @@ defmodule PetStoreWeb do
       defp to_data(%PetStore.Accounts.User{} = user) do
         %{
           id: user.id,
-          email: user.email
+          email: user.email,
+          admin_level: user.admin_level
         }
       end
     end

@@ -6,6 +6,7 @@ defmodule PetStore.Accounts.User do
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
+    field :admin_level, :integer
     field :confirmed_at, :naive_datetime
 
     timestamps()
@@ -36,9 +37,10 @@ defmodule PetStore.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:email, :password, :admin_level])
     |> validate_email(opts)
     |> validate_password(opts)
+    |> validate_admin_level(opts)
   end
 
   defp validate_email(changeset, opts) do
@@ -58,6 +60,11 @@ defmodule PetStore.Accounts.User do
     # |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")
     # |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
     |> maybe_hash_password(opts)
+  end
+
+  defp validate_admin_level(changeset, _opts) do
+    changeset
+    |> validate_inclusion(:admin_level, 0..5, message: "invalid range")
   end
 
   defp maybe_hash_password(changeset, opts) do

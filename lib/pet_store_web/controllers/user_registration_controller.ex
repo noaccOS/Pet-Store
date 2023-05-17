@@ -6,6 +6,16 @@ defmodule PetStoreWeb.UserRegistrationController do
 
   action_fallback PetStoreWeb.FallbackController
 
+  # Registration made by a user, presumably an admin account
+  # Do not login after creation, it was probably created for someone else
+  def create(%Plug.Conn{assigns: %{current_user: %PetStore.Accounts.User{} = creator}} = conn, %{
+        "user" => user_params
+      }) do
+    with {:ok, new_user} <- Accounts.register_user(user_params, creator) do
+      render(conn, :data, data: new_user)
+    end
+  end
+
   def create(conn, %{"user" => user_params}) do
     with {:ok, user} <- Accounts.register_user(user_params) do
       {:ok, _} =
