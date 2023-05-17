@@ -162,7 +162,10 @@ defmodule PetStore.Shop do
   defp can_add_to_cart(current_cart, current_cart), do: {:error, :already_in_cart}
   defp can_add_to_cart(_, _), do: {:error, :forbidden}
 
-  def checkout(%Cart{} = cart, opts \\ [force_refetch: false]) do
+  def checkout(%Cart{} = cart, opts \\ []) do
+    defaults = [force_refetch: false]
+    opts = Keyword.validate!(opts, defaults)
+
     case is_empty?(cart, opts) do
       true ->
         {:error, :bad_request}
@@ -172,8 +175,14 @@ defmodule PetStore.Shop do
     end
   end
 
-  def is_empty?(%Cart{} = cart, opts \\ [force_refetch: false]),
-    do: cart |> PetStore.Repo.preload(:pets, force: opts[:force_refetch]) |> do_is_empty?()
+  def is_empty?(%Cart{} = cart, opts \\ []) do
+    defaults = [force_refetch: false]
+    opts = Keyword.validate!(opts, defaults)
+
+    cart
+    |> PetStore.Repo.preload(:pets, force: opts[:force_refetch])
+    |> do_is_empty?()
+  end
 
   defp do_is_empty?(%Cart{pets: []}), do: true
   defp do_is_empty?(_), do: false
