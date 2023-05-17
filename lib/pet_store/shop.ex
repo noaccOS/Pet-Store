@@ -180,7 +180,7 @@ defmodule PetStore.Shop do
     opts = Keyword.validate!(opts, defaults)
 
     cart
-    |> PetStore.Repo.preload(:pets, force: opts[:force_refetch])
+    |> Repo.preload(:pets, force: opts[:force_refetch])
     |> do_is_empty?()
   end
 
