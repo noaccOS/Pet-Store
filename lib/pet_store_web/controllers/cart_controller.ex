@@ -13,7 +13,7 @@ defmodule PetStoreWeb.CartController do
   end
 
   def show(conn, %{"id" => id}) do
-    cart = Shop.get_cart!(id)
+    cart = Shop.fetch_cart!(id)
     render(conn, :show, cart: cart)
   end
 

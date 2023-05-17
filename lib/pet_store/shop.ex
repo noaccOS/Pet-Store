@@ -30,14 +30,14 @@ defmodule PetStore.Shop do
 
   ## Examples
 
-      iex> get_cart!(123)
+      iex> fetch_cart!(123)
       %Cart{}
 
-      iex> get_cart!(456)
+      iex> fetch_cart!(456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_cart!(id), do: Repo.get!(Cart, id)
+  def fetch_cart!(id), do: Repo.fetch!(Cart, id)
 
   @doc """
   Creates a cart.

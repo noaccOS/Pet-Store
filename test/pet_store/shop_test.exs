@@ -15,9 +15,9 @@ defmodule PetStore.ShopTest do
       assert Shop.list_carts() == [cart]
     end
 
-    test "get_cart!/1 returns the cart with given id" do
+    test "fetch_cart!/1 returns the cart with given id" do
       cart = cart_fixture()
-      assert Shop.get_cart!(cart.id) == cart
+      assert Shop.fetch_cart!(cart.id) == cart
     end
 
     test "create_cart/1 with valid data creates a cart" do
@@ -43,13 +43,13 @@ defmodule PetStore.ShopTest do
     test "update_cart/2 with invalid data returns error changeset" do
       cart = cart_fixture()
       assert {:error, %Ecto.Changeset{}} = Shop.update_cart(cart, @invalid_attrs)
-      assert cart == Shop.get_cart!(cart.id)
+      assert cart == Shop.fetch_cart!(cart.id)
     end
 
     test "delete_cart/1 deletes the cart" do
       cart = cart_fixture()
       assert {:ok, %Cart{}} = Shop.delete_cart(cart)
-      assert_raise Ecto.NoResultsError, fn -> Shop.get_cart!(cart.id) end
+      assert_raise Ecto.NoResultsError, fn -> Shop.fetch_cart!(cart.id) end
     end
 
     test "change_cart/1 returns a cart changeset" do
