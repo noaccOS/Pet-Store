@@ -22,6 +22,7 @@ defmodule PetStoreWeb.Router do
     delete "/users/log_out", UserSessionController, :delete
 
     patch "/pets/:id/add", CartController, :add_to_cart
+    patch "/checkout", CartController, :checkout
   end
 
   scope "/", PetStoreWeb do

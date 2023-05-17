@@ -80,5 +80,27 @@ defmodule PetStore.ShopTest do
       assert {:ok, pet} = Shop.add_to_cart(cart1, pet)
       assert {:error, _} = Shop.add_to_cart(cart2, pet)
     end
+
+    test "is_empty?/1" do
+      cart = cart_fixture()
+      pet = PetStore.AnimalsFixtures.pet_fixture()
+
+      assert Shop.is_empty?(cart)
+
+      Shop.add_to_cart(cart, pet)
+      refute Shop.is_empty?(cart, force_refetch: true)
+    end
+
+    test "checkout/1" do
+      cart = cart_fixture()
+      refute cart.completed_on
+
+      assert {:error, :bad_request} == Shop.checkout(cart)
+      pet = PetStore.AnimalsFixtures.pet_fixture()
+      {:ok, _} = Shop.add_to_cart(cart, pet)
+
+      {:ok, cart} = Shop.checkout(cart, force_refetch: true)
+      assert cart.completed_on
+    end
   end
 end

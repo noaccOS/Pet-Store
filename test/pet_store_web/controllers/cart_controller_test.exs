@@ -94,6 +94,30 @@ defmodule PetStoreWeb.CartControllerTest do
     end
   end
 
+  describe "checkout" do
+    setup [:create_pet]
+
+    test "checkouts open cart for current user", %{user_conn: conn, pet: pet, user: user} do
+      cart = Shop.open_cart_for(user)
+
+      Shop.add_to_cart(cart, pet)
+
+      refute cart.completed_on
+
+      conn
+      |> patch(~p"/checkout")
+      |> json_response(200)
+
+      assert Shop.fetch_cart!(cart.id).completed_on
+    end
+
+    test "errors out on empty cart", %{user_conn: conn} do
+      conn
+      |> patch(~p"/checkout")
+      |> response(400)
+    end
+  end
+
   defp create_cart(_) do
     cart = cart_fixture()
     %{cart: cart}

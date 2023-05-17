@@ -23,6 +23,13 @@ defmodule PetStoreWeb.FallbackController do
 
   def call(conn, {:error, :unauthorized}), do: call(conn, {:error, :forbidden})
 
+  def call(conn, {:error, :bad_request}) do
+    conn
+    |> put_status(:bad_request)
+    |> put_view(json: PetStoreWeb.ErrorJSON)
+    |> render(:"400")
+  end
+
   # This clause is an example of how to handle resources that cannot be found.
   def call(conn, {:error, :not_found}) do
     conn

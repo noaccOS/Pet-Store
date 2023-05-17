@@ -32,4 +32,12 @@ defmodule PetStoreWeb.CartController do
       render(conn, :show, cart: cart)
     end
   end
+
+  def checkout(conn, _params) do
+    user = conn.assigns.current_user
+    cart = Shop.open_cart_for(user)
+
+    with {:ok, cart} <- Shop.checkout(cart),
+         do: render(conn, :show, cart: cart)
+  end
 end
