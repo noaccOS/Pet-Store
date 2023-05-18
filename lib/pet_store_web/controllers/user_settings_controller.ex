@@ -10,8 +10,10 @@ defmodule PetStoreWeb.UserSettingsController do
 
   # Updates email address for lower-admin_level accounts
   def update(conn, %{"action" => "update_email", "target" => target_email, "value" => new_email}) do
-    with {:ok, target} <-
-           Accounts.maybe_redacted_user_by_email(target_email, conn.assigns.current_user),
+    current_user = conn.assigns.current_user
+
+    with {:ok, target} <- Accounts.fetch_user_by_email(target_email),
+         :ok <- Bodyguard.permit(PetStoreWeb.Authorization, :update_email, current_user, target),
          {:ok, new_user} <- Accounts.apply_user_email(target, new_email) do
       token = Accounts.generate_user_token(target)
 
