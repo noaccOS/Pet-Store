@@ -7,7 +7,7 @@ defmodule PetStoreWeb.Authorization do
     same_user_or_higher_admin(target, user)
   end
 
-  def authorize(:show_cart, user, target) do
+  def authorize(:access_cart, user, target) do
     same_user_or_higher_admin(target, user)
   end
 

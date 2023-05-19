@@ -22,7 +22,7 @@ defmodule PetStoreWeb.CartController do
          :ok <-
            Bodyguard.permit(
              PetStoreWeb.Authorization,
-             :show_cart,
+             :access_cart,
              conn.assigns.current_user,
              target
            ),
