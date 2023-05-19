@@ -205,4 +205,21 @@ defmodule PetStore.Shop do
     from(p in Pet, where: p.cart_id == ^cart.id)
     |> Repo.update_all(set: [cart_id: nil])
   end
+
+  def gift_pet(%Pet{} = pet, %User{} = recipient) do
+    Repo.transact(fn ->
+      now = DateTime.now!("Etc/UTC")
+
+      with {:ok, cart_to} <-
+             %Cart{user_id: recipient.id}
+             |> Cart.changeset(%{completed_on: now})
+             |> Repo.insert(),
+           {:ok, updated_pet} <-
+             pet
+             |> Ecto.Changeset.change(cart_id: cart_to.id)
+             |> Repo.update() do
+        {:ok, updated_pet}
+      end
+    end)
+  end
 end

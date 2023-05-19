@@ -7,6 +7,8 @@ defmodule PetStore.ShopTest do
     alias PetStore.Shop.Cart
 
     import PetStore.ShopFixtures
+    import PetStore.AccountsFixtures
+    import PetStore.AnimalsFixtures
 
     @invalid_attrs %{user_id: nil}
 
@@ -119,6 +121,36 @@ defmodule PetStore.ShopTest do
 
       Shop.empty(cart)
       assert Shop.is_empty?(cart)
+    end
+
+    test "gift_pet/2" do
+      original_owner = user_fixture()
+      owners_cart = Shop.open_cart_for(original_owner)
+
+      recipient = user_fixture()
+      recipients_cart = Shop.open_cart_for(recipient)
+
+      pet = pet_fixture()
+
+      {:ok, pet} = Shop.add_to_cart(owners_cart, pet)
+      Shop.checkout(owners_cart, force_refetch: true)
+
+      {:ok, pet} = Shop.gift_pet(pet, recipient)
+      new_cart = Shop.fetch_cart!(pet.cart_id)
+
+      # It's a new cart, but of the same user
+      assert new_cart.id != recipients_cart.id
+      assert new_cart.user_id == recipients_cart.user_id
+
+      # The new cart is completed while the old one should be left untouched
+      assert new_cart.completed_on
+      refute recipients_cart.completed_on
+
+      assert Shop.open_cart_for(recipient).id == recipients_cart.id
+
+      refute pet in (Shop.fetch_cart!(owners_cart.id)
+                     |> Repo.preload(:pets)
+                     |> get_in([Access.key!(:pets)]))
     end
   end
 end
