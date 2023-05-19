@@ -102,5 +102,23 @@ defmodule PetStore.ShopTest do
       {:ok, cart} = Shop.checkout(cart, force_refetch: true)
       assert cart.completed_on
     end
+
+    test "empty/1" do
+      cart = cart_fixture()
+
+      assert Shop.is_empty?(cart)
+
+      Shop.empty(cart)
+      assert Shop.is_empty?(cart)
+
+      pet1 = PetStore.AnimalsFixtures.pet_fixture(name: "first")
+      pet2 = PetStore.AnimalsFixtures.pet_fixture(name: "second")
+      Shop.add_to_cart(cart, pet1)
+      Shop.add_to_cart(cart, pet2)
+      refute Shop.is_empty?(cart)
+
+      Shop.empty(cart)
+      assert Shop.is_empty?(cart)
+    end
   end
 end

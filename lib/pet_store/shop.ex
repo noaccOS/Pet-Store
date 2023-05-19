@@ -200,4 +200,9 @@ defmodule PetStore.Shop do
 
   defp do_is_empty?(%Cart{pets: []}), do: true
   defp do_is_empty?(_), do: false
+
+  def empty(%Cart{} = cart) do
+    from(p in Pet, where: p.cart_id == ^cart.id, update: [set: [cart_id: nil]])
+    |> Repo.update_all([])
+  end
 end
