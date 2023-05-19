@@ -47,4 +47,13 @@ defmodule PetStoreWeb.CartController do
     with {:ok, cart} <- Shop.checkout(cart),
          do: render(conn, :show, cart: cart)
   end
+
+  def empty_by_open(conn, _params),
+    do: conn.assigns.current_user |> Shop.open_cart_for() |> do_empty_cart(conn)
+
+  defp do_empty_cart(cart, conn) do
+    Shop.empty(cart)
+    cart = PetStore.Repo.preload(cart, :pets, force: true)
+    render(conn, :show, cart: cart)
+  end
 end

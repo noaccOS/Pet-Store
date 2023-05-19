@@ -118,6 +118,29 @@ defmodule PetStoreWeb.CartControllerTest do
     end
   end
 
+  describe "empty_by_open" do
+    setup [:create_pet]
+
+    test "removes all pets from the user's open cart", %{user_conn: conn, pet: pet, user: user} do
+      cart = Shop.open_cart_for(user)
+
+      Shop.add_to_cart(cart, pet)
+      refute Shop.is_empty?(cart)
+
+      conn
+      |> post(~p"/empty")
+      |> json_response(200)
+
+      assert Shop.is_empty?(cart, force_refetch: true)
+    end
+
+    test "errors out on unauthenticated conn", %{conn: conn} do
+      conn
+      |> post(~p"/empty")
+      |> response(401)
+    end
+  end
+
   defp create_cart(_) do
     cart = cart_fixture()
     %{cart: cart}

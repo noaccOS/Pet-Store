@@ -24,6 +24,7 @@ defmodule PetStoreWeb.Router do
     patch "/pets/:id/add", CartController, :add_to_cart
     get "/users/:id/cart", CartController, :show_open
     patch "/checkout", CartController, :checkout
+    post "/empty", CartController, :empty_by_open
   end
 
   scope "/", PetStoreWeb do
