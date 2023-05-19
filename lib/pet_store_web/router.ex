@@ -20,6 +20,11 @@ defmodule PetStoreWeb.Router do
     get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
 
     delete "/users/log_out", UserSessionController, :delete
+
+    patch "/pets/:id/add", CartController, :add_to_cart
+    get "/users/:id/cart", CartController, :show_open
+    patch "/checkout", CartController, :checkout
+    post "/empty", CartController, :empty_by_open
   end
 
   scope "/", PetStoreWeb do
@@ -43,6 +48,10 @@ defmodule PetStoreWeb.Router do
     patch "/pets/:id", PetController, :update
     put "/pets/:id", PetController, :update
     delete "/pets/:id", PetController, :delete
+
+    get "/carts", CartController, :index
+    get "/carts/:id", CartController, :show
+    post "/carts/:id/empty", CartController, :empty_by_id
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

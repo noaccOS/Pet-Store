@@ -63,4 +63,11 @@ defmodule PetStoreWeb.ConnCase do
     |> Plug.Conn.assign(:user_token, token)
     |> Plug.Conn.assign(:current_user, user)
   end
+
+  @doc """
+  Sets a value in the path parameters.
+  """
+  def put_req_path_param(conn, key, value) do
+    put_in(conn.path_params[key], value)
+  end
 end

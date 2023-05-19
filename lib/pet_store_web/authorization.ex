@@ -7,6 +7,10 @@ defmodule PetStoreWeb.Authorization do
     same_user_or_higher_admin(target, user)
   end
 
+  def authorize(:access_cart, user, target) do
+    same_user_or_higher_admin(target, user)
+  end
+
   ### Same user or higehr admin
 
   defp same_user_or_higher_admin(%User{id: id} = _target, %User{id: id} = _caller), do: :ok
