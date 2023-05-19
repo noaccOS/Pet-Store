@@ -18,9 +18,16 @@ defmodule PetStoreWeb.CartController do
   end
 
   def show_open(conn, %{"id" => user_id}) do
-    user = Accounts.fetch_user!(user_id)
-    cart = Shop.open_cart_for(user)
-    render(conn, :show, cart: cart)
+    with {:ok, target} <- Accounts.fetch_user(user_id),
+         :ok <-
+           Bodyguard.permit(
+             PetStoreWeb.Authorization,
+             :show_cart,
+             conn.assigns.current_user,
+             target
+           ),
+         cart = Shop.open_cart_for(target),
+         do: render(conn, :show, cart: cart)
   end
 
   def add_to_cart(conn, %{"id" => pet_id}) do

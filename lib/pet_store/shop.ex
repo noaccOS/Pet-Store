@@ -26,6 +26,20 @@ defmodule PetStore.Shop do
   @doc """
   Gets a single cart.
 
+  ## Examples
+
+      iex> fetch_cart!(123)
+      {:ok, %Cart{}}
+
+      iex> fetch_cart!(456)
+      {:error, :not_found}
+
+  """
+  def fetch_cart(id), do: Repo.fetch(Cart, id)
+
+  @doc """
+  Gets a single cart.
+
   Raises `Ecto.NoResultsError` if the Cart does not exist.
 
   ## Examples
