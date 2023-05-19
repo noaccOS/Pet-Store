@@ -51,6 +51,7 @@ defmodule PetStoreWeb.Router do
 
     get "/carts", CartController, :index
     get "/carts/:id", CartController, :show
+    post "/carts/:id/empty", CartController, :empty_by_id
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

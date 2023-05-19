@@ -5,6 +5,7 @@ defmodule PetStoreWeb.CartControllerTest do
   alias PetStore.Shop
   import PetStore.ShopFixtures
   import PetStore.AnimalsFixtures
+  import PetStore.AccountsFixtures
 
   setup %{conn: conn} do
     conn = put_req_header(conn, "accept", "application/json")
@@ -138,6 +139,58 @@ defmodule PetStoreWeb.CartControllerTest do
       conn
       |> post(~p"/empty")
       |> response(401)
+    end
+  end
+
+  describe "empty_by_id" do
+    setup [:create_pet]
+
+    test "removes all pets from the specified cart", %{admin_conn: conn, pet: pet, user: user} do
+      cart = Shop.open_cart_for(user)
+
+      Shop.add_to_cart(cart, pet)
+      refute Shop.is_empty?(cart)
+
+      conn
+      |> post(~p"/carts/#{cart}/empty")
+      |> json_response(200)
+
+      assert Shop.is_empty?(cart, force_refetch: true)
+    end
+
+    test "errors out on unauthenticated conn", %{conn: conn} do
+      conn
+      |> post(~p"/empty")
+      |> response(401)
+    end
+
+    test "errors out on unauthorized conn", %{admin_conn: conn, admin: user} do
+      other_user = user_fixture(admin_level: user.admin_level)
+      cart = Shop.open_cart_for(other_user)
+
+      conn
+      |> post(~p"/carts/#{cart}/empty")
+      |> response(403)
+    end
+
+    test "can empty one's own cart", %{admin_conn: conn, admin: user} do
+      cart = Shop.open_cart_for(user)
+
+      conn
+      |> post(~p"/carts/#{cart}/empty")
+      |> json_response(200)
+
+      assert Shop.is_empty?(cart, force_refetch: true)
+    end
+
+    test "cannot empty completed carts", %{admin_conn: conn, user: user, pet: pet} do
+      cart = Shop.open_cart_for(user)
+      Shop.add_to_cart(cart, pet)
+      Shop.checkout(cart, force_refetch: true)
+
+      conn
+      |> post(~p"/carts/#{cart}/empty")
+      |> response(403)
     end
   end
 

@@ -51,9 +51,30 @@ defmodule PetStoreWeb.CartController do
   def empty_by_open(conn, _params),
     do: conn.assigns.current_user |> Shop.open_cart_for() |> do_empty_cart(conn)
 
+  def empty_by_id(conn, %{"id" => cart_id}) do
+    with {:ok, cart} <- Shop.fetch_cart(cart_id),
+         :ok <- validate_open_cart(cart),
+         owner = Accounts.fetch_user!(cart.user_id),
+         :ok <-
+           Bodyguard.permit(
+             PetStoreWeb.Authorization,
+             :access_cart,
+             conn.assigns.current_user,
+             owner
+           ) do
+      do_empty_cart(cart, conn)
+    end
+  end
+
   defp do_empty_cart(cart, conn) do
     Shop.empty(cart)
     cart = PetStore.Repo.preload(cart, :pets, force: true)
     render(conn, :show, cart: cart)
+  end
+
+  defp validate_open_cart(cart) do
+    if cart.completed_on,
+      do: {:error, :forbidden},
+      else: :ok
   end
 end
