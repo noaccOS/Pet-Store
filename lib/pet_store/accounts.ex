@@ -25,11 +25,7 @@ defmodule PetStore.Accounts do
 
   """
   def fetch_user_by_email(email) when is_binary(email) do
-    with %User{} = user <- Repo.get_by(User, email: email) do
-      {:ok, user}
-    else
-      _ -> {:error, :not_found}
-    end
+    Repo.fetch_by(User, email: email)
   end
 
   @doc """
@@ -56,6 +52,20 @@ defmodule PetStore.Accounts do
   @doc """
   Gets a single user.
 
+  ## Examples
+
+      iex> fetch_user(123)
+      {:ok, %User{}}
+
+      iex> fetch_user(456)
+      {:error, :not_found}
+
+  """
+  def fetch_user(id), do: Repo.fetch(User, id)
+
+  @doc """
+  Gets a single user.
+
   Raises `Ecto.NoResultsError` if the User does not exist.
 
   ## Examples
@@ -67,7 +77,7 @@ defmodule PetStore.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def fetch_user!(id), do: Repo.get!(User, id)
+  def fetch_user!(id), do: Repo.fetch!(User, id)
 
   ## User registration
 
