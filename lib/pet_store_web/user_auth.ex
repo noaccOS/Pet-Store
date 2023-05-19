@@ -64,37 +64,6 @@ defmodule PetStoreWeb.UserAuth do
     end
   end
 
-  @doc """
-  Plug which only allows connections where the requested user is the same as the logged in user
-  or the logged in user has higher admin rights
-  """
-  def same_user_or_higher_admin(conn, _opts) do
-    caller_id = get_in(conn.assigns, [:current_user, Access.key!(:id)])
-
-    requested_id =
-      get_in(conn.path_params, [Access.key("id", "")])
-      |> Integer.parse()
-      |> case do
-        :error -> nil
-        {id, ""} -> id
-      end
-
-    if caller_id && requested_id &&
-         (same_user(caller_id, requested_id) or
-            higher_admin(conn.assigns.current_user.admin_level, requested_id)),
-       do: conn,
-       else: raise_error(conn, :forbidden)
-  end
-
-  defp same_user(x, y), do: x == y
-
-  defp higher_admin(caller_level, requested_id) do
-    case Accounts.fetch_user(requested_id) do
-      {:ok, user} -> caller_level > user.admin_level
-      _ -> false
-    end
-  end
-
   defp raise_error(conn, status, body \\ "") do
     conn
     |> resp(status, body)

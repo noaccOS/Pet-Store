@@ -22,6 +22,7 @@ defmodule PetStoreWeb.Router do
     delete "/users/log_out", UserSessionController, :delete
 
     patch "/pets/:id/add", CartController, :add_to_cart
+    get "/users/:id/cart", CartController, :show_open
     patch "/checkout", CartController, :checkout
   end
 
@@ -49,12 +50,6 @@ defmodule PetStoreWeb.Router do
 
     get "/carts", CartController, :index
     get "/carts/:id", CartController, :show
-  end
-
-  scope "/", PetStoreWeb do
-    pipe_through [:api, :require_authenticated_user, :same_user_or_higher_admin]
-
-    get "/users/:id/cart", CartController, :show_open
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
