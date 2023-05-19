@@ -31,6 +31,18 @@ defmodule PetStoreWeb.Router do
     post "/users/log_in", UserSessionController, :create
     post "/users/reset_password", UserResetPasswordController, :create
     put "/users/reset_password/:token", UserResetPasswordController, :update
+
+    get "/pets", PetController, :index
+    get "/pets/:id", PetController, :show
+  end
+
+  scope "/", PetStoreWeb do
+    pipe_through [:api, :require_admin]
+
+    post "/pets", PetController, :create
+    patch "/pets/:id", PetController, :update
+    put "/pets/:id", PetController, :update
+    delete "/pets/:id", PetController, :delete
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
